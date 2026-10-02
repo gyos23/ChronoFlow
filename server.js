@@ -8,14 +8,17 @@ const { execFile, exec } = require('child_process');
 const os = require('os');
 
 const PORT = process.env.PORT || 3333;
-const DATA_DIR = path.join(__dirname, 'data');
+const IS_VERCEL = Boolean(process.env.VERCEL);
+const DATA_DIR = IS_VERCEL ? '/tmp' : path.join(__dirname, 'data');
 const HEALTH_FILE = path.join(DATA_DIR, 'health_today.json');
 const OMNI_CACHE_FILE = path.join(DATA_DIR, 'omnifocus_cache.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {}
 }
 
 // iCloud Drive ChronoFlow Folder
@@ -253,6 +256,10 @@ const server = http.createServer((req, res) => {
         try {
           cached = JSON.parse(fs.readFileSync(OMNI_CACHE_FILE, 'utf8'));
         } catch (e) {}
+      } else if (fs.existsSync(path.join(__dirname, 'data', 'omnifocus_cache.json'))) {
+        try {
+          cached = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'omnifocus_cache.json'), 'utf8'));
+        } catch (e) {}
       }
 
       if (error || !stdout) {
@@ -317,7 +324,11 @@ const server = http.createServer((req, res) => {
       if (tasks.length === 0) {
         return jsonResponse(res, 400, { error: 'No tasks provided in payload' });
       }
-      fs.writeFileSync(OMNI_CACHE_FILE, JSON.stringify(tasks, null, 2));
+      try {
+        fs.writeFileSync(OMNI_CACHE_FILE, JSON.stringify(tasks, null, 2));
+      } catch (writeErr) {
+        console.warn('Cache write bypassed:', writeErr.message);
+      }
       broadcastEvent('omnifocus_updated', { count: tasks.length });
       return jsonResponse(res, 200, {
         success: true,
