@@ -7,9 +7,9 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 
-// Target URL: Default from environment variable or command-line args or localhost
+// Target URL: Default from environment variable or command-line args or mychronoflow.vercel.app
 const args = process.argv.slice(2);
-let targetUrl = process.env.CHRONOFLOW_CLOUD_URL || 'http://localhost:3333';
+let targetUrl = process.env.CHRONOFLOW_CLOUD_URL || 'https://mychronoflow.vercel.app';
 let runOnce = args.includes('--once');
 let intervalMinutes = 5;
 
