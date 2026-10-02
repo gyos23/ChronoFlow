@@ -398,6 +398,17 @@ function jsonResponse(res, code, data) {
 }
 
 function readJsonBody(req, callback) {
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === 'string') {
+      try {
+        return callback(null, JSON.parse(req.body));
+      } catch (err) {
+        return callback(err, null);
+      }
+    }
+    return callback(null, req.body);
+  }
+
   let body = '';
   req.on('data', chunk => {
     body += chunk.toString();
@@ -407,7 +418,7 @@ function readJsonBody(req, callback) {
   });
   req.on('end', () => {
     try {
-      const parsed = JSON.parse(body);
+      const parsed = body.trim() ? JSON.parse(body) : {};
       callback(null, parsed);
     } catch (err) {
       callback(err, null);
