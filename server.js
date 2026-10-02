@@ -311,7 +311,7 @@ const server = http.createServer((req, res) => {
   if ((pathname === '/api/omnifocus/sync' || pathname === '/api/omnifocus/tasks') && req.method === 'POST') {
     readJsonBody(req, (err, body) => {
       if (err || !body) {
-        return jsonResponse(res, 400, { error: 'Invalid JSON payload' });
+        return jsonResponse(res, 400, { error: 'Invalid JSON payload: ' + (err ? err.message : 'empty body') });
       }
       const tasks = body.tasks || (Array.isArray(body) ? body : []);
       if (tasks.length === 0) {
@@ -399,6 +399,13 @@ function jsonResponse(res, code, data) {
 
 function readJsonBody(req, callback) {
   if (req.body !== undefined && req.body !== null) {
+    if (Buffer.isBuffer(req.body)) {
+      try {
+        return callback(null, JSON.parse(req.body.toString('utf8')));
+      } catch (err) {
+        return callback(err, null);
+      }
+    }
     if (typeof req.body === 'string') {
       try {
         return callback(null, JSON.parse(req.body));
