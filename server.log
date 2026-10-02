@@ -1,0 +1,13 @@
+📁 Watching iCloud directory: /Users/tlf/Library/Mobile Documents/com~apple~CloudDocs/ChronoFlow
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                      CHRONOFLOW STUDIO                            ║
+║     Ultradian Energy Architecture • OmniFocus • Apple Health      ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+🚀 Studio running at: http://localhost:3333
+🍏 OmniFocus Integration: Ready (osascript JXA Bridge)
+⌚ Apple Health / Watch Sync: Ready
+   • Webhook: POST http://localhost:3333/api/health/sync
+   • iCloud Sync folder: /Users/tlf/Library/Mobile Documents/com~apple~CloudDocs/ChronoFlow
+

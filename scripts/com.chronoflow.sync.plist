@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.chronoflow.sync</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/node</string>
+        <string>/Users/tlf/Documents/5. Freedom/GitHub/ChronoFlow/scripts/mac_sync_daemon.js</string>
+        <string>--interval</string>
+        <string>5</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/tlf/Documents/5. Freedom/GitHub/ChronoFlow/data/daemon.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/tlf/Documents/5. Freedom/GitHub/ChronoFlow/data/daemon_err.log</string>
+</dict>
+</plist>

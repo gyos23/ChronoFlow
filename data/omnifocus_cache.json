@@ -1,0 +1,1032 @@
+[
+  {
+    "id": "iY3FQ5NmNIZ",
+    "title": "Refund from Stronger by Science",
+    "project": "Inbox",
+    "tags": [],
+    "duration": 30,
+    "dueDate": "2026-10-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "admin"
+  },
+  {
+    "id": "p-DxIXfnIj8",
+    "title": "Review/Plan for the Month 🧐",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "Habits",
+      "P1. Fortitude"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "dwM3S3696R3",
+    "title": "Review and Plan 13 Weeks",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "Habits",
+      "P1. Fortitude"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "a8cCGWbr44W",
+    "title": "Clear eyes are MRI safe",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "i4FgSBIPm3m",
+    "title": "Time box",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "P1. Fortitude",
+      "T2. Manageable"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "aaAhMNh8HpY",
+    "title": "Draft & schedule \"Why I built this\" origin post / Reel (script + shot list needed)",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom",
+      "T3. High"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "kaCS0EmTzOH",
+    "title": "Publish 3 direct product breakdown clips (problem → layout solution) (needs script + shot list)",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-17T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "bHmAAbU5Pfx",
+    "title": "Make time to review notes and lessons learned",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P1. Fortitude",
+      "PC. Normal",
+      "Habits"
+    ],
+    "duration": 20,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "habit"
+  },
+  {
+    "id": "m5Sur6ZgUjs",
+    "title": "Study Learning Techniques",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P1. Fortitude"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "habit"
+  },
+  {
+    "id": "mvehNoctJTj",
+    "title": "Update Bio",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PC. Normal",
+      "P1. Fortitude",
+      "Habits"
+    ],
+    "duration": 10,
+    "dueDate": "2026-10-02T06:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": true,
+    "isPlannedToday": false,
+    "omniTime": "7:00 AM",
+    "type": "habit"
+  },
+  {
+    "id": "g1j3ilOSnv8",
+    "title": "Study",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-02T08:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": true,
+    "isPlannedToday": false,
+    "omniTime": "9:00 AM",
+    "type": "deep"
+  },
+  {
+    "id": "a5dDk9t8bkB",
+    "title": "🔁 Shoot 3 video walkthroughs / layouts",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "P5. Freedom"
+    ],
+    "duration": 30,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "ceEXl_aHrGw",
+    "title": "Claude Code with Deepseek",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P1. Fortitude"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "habit"
+  },
+  {
+    "id": "n52EFrMy8S2",
+    "title": "Post mortem of time in aer Lingus ",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "aL_XN-P-72Y",
+    "title": "Prepare for Demetra",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": "2026-10-02T09:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": true,
+    "isPlannedToday": false,
+    "omniTime": "10:00 AM",
+    "type": "admin"
+  },
+  {
+    "id": "aylJ3u3LAfy",
+    "title": "Perform a structured personal audit",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P1. Fortitude"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "habit"
+  },
+  {
+    "id": "jhkjtpBlgb_",
+    "title": "Apply to work",
+    "project": "⚪️2. Land Next Role ▶️",
+    "tags": [
+      "P4. Forward",
+      "PA. Top",
+      "T3. High"
+    ],
+    "duration": 240,
+    "dueDate": "2026-10-02T14:15:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": true,
+    "isPlannedToday": false,
+    "omniTime": "3:15 PM",
+    "type": "deep"
+  },
+  {
+    "id": "mrnHJC6Vtoa",
+    "title": "Nidhca form",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PA. Top",
+      "P3. Finance"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-02T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": true,
+    "isPlannedToday": false,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "ieb6qJDeADF",
+    "title": "🔁 Publish From the Ground Up newsletter + 500-sub target check-in",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PB. High",
+      "P5. Freedom",
+      "T3. High"
+    ],
+    "duration": 120,
+    "dueDate": "2026-10-02T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": true,
+    "isPlannedToday": false,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "iOgThYaE1MB",
+    "title": "Weekly: remove 1 item from recurring charges",
+    "project": "🟢3. Improve Financial Wealth 💳 🚫",
+    "tags": [
+      "PA. Top",
+      "P3. Finance"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-03T04:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 AM",
+    "type": "deep"
+  },
+  {
+    "id": "celrrIQIQlu",
+    "title": "Continue exploring videos that may be business related - I left off January 2025",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PC. Normal",
+      "E1. Low",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "deep"
+  },
+  {
+    "id": "oj60j45lO2Z",
+    "title": "Janice 50th birthday ",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P2. Family"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "mFogMB6xRwY",
+    "title": "Boost post on IG desktop",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P5. Freedom"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "deep"
+  },
+  {
+    "id": "hzk-CjEq43L",
+    "title": "Deep Room organization",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P1. Fortitude",
+      "PA. Top"
+    ],
+    "duration": 180,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "deep"
+  },
+  {
+    "id": "dflLeX2fybx",
+    "title": "Review finances",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "Habits",
+      "P3. Finance"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-03T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "nJLEA5wxNBA",
+    "title": "upload photos for Arthur and Marcus",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PC. Normal",
+      "P2. Family"
+    ],
+    "duration": 30,
+    "dueDate": "2026-10-03T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "admin"
+  },
+  {
+    "id": "gTyVlSUAzG2",
+    "title": "Add customer feedback quotes directly to landing page checkout",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-03T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "k-lItdFe5SA",
+    "title": "Saturday review: all three goals",
+    "project": "🟢3. Improve Financial Wealth 💳 🚫",
+    "tags": [
+      "P3. Finance"
+    ],
+    "duration": 90,
+    "dueDate": "2026-10-03T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "fb0btma8ISj",
+    "title": "Poke around revenue.ie",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "P3. Finance"
+    ],
+    "duration": 45,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "gt9ZD8RoQW1",
+    "title": "Write my “40 Pages”",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "Life",
+      "PA. Top",
+      "P1. Fortitude"
+    ],
+    "duration": 60,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "deep"
+  },
+  {
+    "id": "ezM-9_bvNGb",
+    "title": "Business Taxes for 2027",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P3. Finance",
+      "PC. Normal"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "dRpJxgOKzX5",
+    "title": "Plan/Review the Week ✍️",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "Habits",
+      "P1. Fortitude"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-04T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "c51cUwozVU8",
+    "title": "Project Review",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "P1. Fortitude",
+      "Habits"
+    ],
+    "duration": 15,
+    "dueDate": "2026-10-04T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "habit"
+  },
+  {
+    "id": "eKMLqNV2zdY",
+    "title": "1 hour R50 tutorial ",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PC. Normal",
+      "T3. High",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-04T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "bIAjE0lN6Kf",
+    "title": "🔁 Weekly sales + subscriber review",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-04T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "lIYSubWpkIy",
+    "title": "Inish PowerPoint ",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P2. Family",
+      "PC. Normal"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "jEwKTc9njsN",
+    "title": "Linked in learning",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "dcaze9rxbgP",
+    "title": "Create sis website",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P2. Family"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  },
+  {
+    "id": "es1-sOTgHU_",
+    "title": "Cancel Setapp and consider buying indvidual apps",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P3. Finance",
+      "PD. Low"
+    ],
+    "duration": 45,
+    "dueDate": "2026-10-10T05:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "6:00 AM",
+    "type": "admin"
+  },
+  {
+    "id": "fmHiRJnnfib",
+    "title": "Call Cool-Ray",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PB. High",
+      "P3. Finance"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-11T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "cPwAfFXvY07",
+    "title": "Biweekly: job-search check-in",
+    "project": "⚪️2. Land Next Role ▶️",
+    "tags": [
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": "2026-10-14T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "admin"
+  },
+  {
+    "id": "jxP0H8jIfUo",
+    "title": "Phase 1: Organic Push — 100 units",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-17T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "e3UFIGiwvyA",
+    "title": "Gate Check: 100 units sold ($2,999 revenue)",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-10-17T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "oaifWA8Hpuj",
+    "title": "Phase 2: Email + Organic Scale — 100 units",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-11-21T17:00:00.000Z",
+    "deferDate": "2026-10-17T23:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "cTry9JsvN7z",
+    "title": "Draft 3-part automated email welcome & product walkthrough sequence",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-11-21T17:00:00.000Z",
+    "deferDate": "2026-10-17T23:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "kTPoLoD50F-",
+    "title": "Set up referral / \"gift a colleague\" checkout link",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-11-21T17:00:00.000Z",
+    "deferDate": "2026-10-17T23:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "dzHOxnHxQA7",
+    "title": "Gate Check: 200 units cumulative ($5,998 revenue)",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-11-21T17:00:00.000Z",
+    "deferDate": "2026-10-17T23:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "jhAB7q3CnBJ",
+    "title": "Golf head swap",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P1. Fortitude"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "habit"
+  },
+  {
+    "id": "mU-37arEbhN",
+    "title": "Review Smartsheet Cancellation",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "PA. Top",
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": "2026-12-15T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "o6SUM8EtwG5",
+    "title": "🔴 1. Sell 300 Planners 📖",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "ohJm_RXAHch",
+    "title": "Cadence & Maintenance",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "i6QQAfDW_cD",
+    "title": "Phase 3: Final Sprint — 100 units",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": "2026-11-22T00:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "ayvwops-RzP",
+    "title": "Execute final stock clearance push across email + socials",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": "2026-11-22T00:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "n2AF9fRgaPr",
+    "title": "Inventory cleared / V3 design unlocked",
+    "project": "🔴 1. Sell 300 Planners 📖",
+    "tags": [
+      "PA. Top",
+      "P5. Freedom"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": "2026-11-22T00:00:00.000Z",
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "erCC5VflUnm",
+    "title": "⚪️2. Land Next Role ▶️",
+    "project": "⚪️2. Land Next Role ▶️",
+    "tags": [
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "admin"
+  },
+  {
+    "id": "oB49X5swNjY",
+    "title": "Thought Leadership Piece",
+    "project": "⚪️2. Land Next Role ▶️",
+    "tags": [
+      "P4. Forward"
+    ],
+    "duration": 30,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "admin"
+  },
+  {
+    "id": "ou77DP-iI5_",
+    "title": "🟢3. Improve Financial Wealth 💳 🚫",
+    "project": "🟢3. Improve Financial Wealth 💳 🚫",
+    "tags": [
+      "PA. Top",
+      "P3. Finance"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "gRJ5y89sEFN",
+    "title": "Review spending in Lunch Money and set the baseline number",
+    "project": "🟢3. Improve Financial Wealth 💳 🚫",
+    "tags": [
+      "PA. Top",
+      "P3. Finance"
+    ],
+    "duration": 60,
+    "dueDate": "2026-12-31T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "dosOzYg1pJt",
+    "title": "Pay Georgia Annual Business Filing",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P5. Freedom",
+      "PA. Top"
+    ],
+    "duration": 60,
+    "dueDate": "2027-03-29T17:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "6:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "dNiLq3_SH4A",
+    "title": "Pay Registered Agent",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P5. Freedom"
+    ],
+    "duration": 30,
+    "dueDate": "2028-04-01T16:00:00.000Z",
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "5:00 PM",
+    "type": "deep"
+  },
+  {
+    "id": "bR9JIRWUkcp",
+    "title": "Download Peaks after Rise expires",
+    "project": "📆 Day 2 Day",
+    "tags": [
+      "P3. Finance"
+    ],
+    "duration": 30,
+    "dueDate": null,
+    "deferDate": null,
+    "flagged": false,
+    "isDueToday": false,
+    "isPlannedToday": true,
+    "omniTime": "",
+    "type": "admin"
+  }
+]

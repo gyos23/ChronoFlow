@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ChronoFlow">
+  <meta name="theme-color" content="#060a12">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+  <title>ChronoFlow — Ultradian Energy & Task Triage Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#0f172a',
+              900: '#0b1120',
+              950: '#060a12',
+            },
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            peak: {
+              gold: '#f59e0b',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              violet: '#8b5cf6',
+            },
+            trough: '#38bdf8'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full flex flex-col font-sans selection:bg-brand-500/30 selection:text-brand-100 overflow-x-hidden text-slate-100">
+
+  <!-- Header & Live Biometrics Bar -->
+  <header class="glass-panel sticky top-0 z-40 border-b border-slate-700/80 px-4 lg:px-6 py-3 shrink-0">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Date Context -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/30 energy-pulse">
+          <i class="fa-solid fa-bolt-lightning text-white text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              ChronoFlow
+              <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-500/25 text-brand-200 border border-brand-500/40">Ultradian Studio</span>
+            </h1>
+            <!-- Apple Watch Status Pill -->
+            <button id="btnHealthModalTrigger" class="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 shadow-sm" title="Click to view Apple Watch & Health Sats">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-ping"></span>
+              <i class="fa-brands fa-apple text-xs text-emerald-300"></i>
+              <span id="headerWatchSummary">Watch: Sats 98% • Wake 6:00a</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
+            <i class="fa-regular fa-calendar-check text-slate-400"></i>
+            <span id="headerDateDisplay" class="text-slate-200 font-semibold">Wednesday, Sep 30</span>
+            <span class="text-slate-500">•</span>
+            <span id="headerTimeClock" class="font-mono text-white font-semibold">10:45 AM</span>
+            <span class="text-slate-500">•</span>
+            <span id="currentPhaseBadge" class="text-emerald-300 font-bold">10:45 AM Deep Kickoff</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Triage & Control Actions -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="btnAutoTriage" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-brand-500/30 transition-all flex items-center gap-1.5 border border-indigo-400/40">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+          <span>Auto-Triage Today</span>
+        </button>
+
+        <!-- Chrono Wake / Sleep Calibration Trigger -->
+        <button id="btnSleepWakeConfig" class="px-3 py-2 rounded-xl bg-slate-850 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-amber-500/40 transition flex items-center gap-1.5 shadow-sm" title="Adjust Wake and Sleep Times">
+          <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+          <span id="wakeSleepSummary">Wake: 6:00 AM</span>
+          <i class="fa-solid fa-sliders text-[11px] text-slate-400 ml-0.5"></i>
+        </button>
+
+        <!-- OmniFocus Live Sync Button -->
+        <button id="btnSyncOmni" class="px-3 py-2 rounded-xl bg-slate-850 hover:bg-slate-700 text-cyan-300 text-xs font-bold border border-cyan-500/40 transition flex items-center gap-1.5 shadow-sm" title="Pull tasks from OmniFocus 4">
+          <i class="fa-solid fa-rotate text-cyan-400"></i>
+          <span id="omniSyncBtnText">OmniFocus</span>
+          <span id="omniLiveBadge" class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Standby</span>
+        </button>
+
+        <button id="btnExportOmni" class="px-3.5 py-2 rounded-xl bg-slate-850 hover:bg-slate-700 text-indigo-300 hover:text-white text-xs font-bold border border-indigo-500/40 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <span>Omni Actions</span>
+        </button>
+
+        <button id="btnOpenTimer" class="px-3 py-2 rounded-xl bg-emerald-950/70 text-emerald-300 hover:bg-emerald-900/70 text-xs font-bold border border-emerald-500/40 transition flex items-center gap-1.5">
+          <i class="fa-regular fa-clock"></i>
+          <span id="timerNavSummary">90m Focus Timer</span>
+        </button>
+
+        <button id="btnResetAll" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition" title="Reset Day">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 space-y-5">
+
+    <!-- Apple Health & Biometrics Telemetry Strip -->
+    <section class="glass-panel rounded-2xl p-4 border border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-slate-900/90">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3.5">
+        
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-300 shrink-0 shadow-sm">
+            <i class="fa-solid fa-heart-pulse text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs uppercase tracking-wider font-extrabold text-emerald-400 flex items-center gap-1.5">
+                <i class="fa-brands fa-apple text-sm"></i> Apple Health Biometrics
+              </span>
+              <span id="healthSourcePill" class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700">
+                Apple Watch Synced
+              </span>
+              <span id="caffeineNoticePill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/25 text-amber-300 border border-amber-500/40">
+                ☕ Hold caffeine until 7:30 AM
+              </span>
+            </div>
+            <p id="healthSummaryText" class="text-xs text-slate-200 mt-1 leading-relaxed">
+              Overnight recovery optimal. Blood oxygen <strong class="text-emerald-300 font-bold" id="textSatsSummary">98%</strong>, HRV <strong class="text-amber-300 font-bold" id="textHrvSummary">68 ms</strong>, Resting HR <strong class="text-cyan-300 font-bold" id="textRhrSummary">52 bpm</strong>. Primed for deep work.
+            </p>
+          </div>
+        </div>
+
+        <!-- Biometric Gauges -->
+        <div class="flex items-center gap-2.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+          <!-- Blood Oxygen Sats -->
+          <div class="bg-slate-900 border border-emerald-500/40 rounded-xl px-3 py-2 text-center min-w-[90px] cursor-pointer hover:border-emerald-400 hover:bg-slate-850 transition shadow-sm" onclick="openHealthModal()" title="Blood Oxygen Saturation (SpO2)">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Sats (SpO2)</span>
+            <span id="gaugeSats" class="text-lg font-mono font-bold text-emerald-300">98%</span>
+          </div>
+
+          <!-- HRV -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center min-w-[90px] cursor-pointer hover:border-indigo-400 hover:bg-slate-850 transition shadow-sm" onclick="openHealthModal()" title="Heart Rate Variability (SDNN)">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">HRV</span>
+            <span id="gaugeHrv" class="text-lg font-mono font-bold text-indigo-300">68 ms</span>
+          </div>
+
+          <!-- Resting HR -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center min-w-[90px] cursor-pointer hover:border-rose-400 hover:bg-slate-850 transition shadow-sm" onclick="openHealthModal()" title="Resting Heart Rate">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Resting HR</span>
+            <span id="gaugeRhr" class="text-lg font-mono font-bold text-rose-300">52 bpm</span>
+          </div>
+
+          <!-- Sleep Duration -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center min-w-[90px] cursor-pointer hover:border-amber-400 hover:bg-slate-850 transition shadow-sm" onclick="openSleepWakeModal()" title="Sleep Duration">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Sleep Log</span>
+            <span id="gaugeSleep" class="text-lg font-mono font-bold text-amber-300">7.5 hrs</span>
+          </div>
+
+          <!-- Readiness Index -->
+          <div class="bg-slate-900 border border-emerald-500/50 rounded-xl px-3 py-2 text-center min-w-[95px] bg-emerald-950/30 shadow-sm">
+            <span class="text-[11px] uppercase font-bold text-emerald-400 block tracking-wide">Readiness</span>
+            <span id="gaugeReadiness" class="text-lg font-mono font-bold text-emerald-300">92%</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Capacity & Cognitive Load Diagnostic Bar -->
+    <section class="glass-panel rounded-2xl p-4 lg:p-5 relative overflow-hidden">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs uppercase tracking-wider font-extrabold text-slate-300">Day Flow Diagnosis</span>
+            <span id="capacityStatusPill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              Morning Foundation Won (6:00 – 10:45 AM Done)
+            </span>
+          </div>
+          <p id="capacityStatusText" class="text-sm text-slate-200 leading-relaxed font-normal">
+            Meditation, gym workout (7–8a), family connection (till 8:55a), high-protein fuel, and shower are locked in. Primed for a high-clarity <strong>10:45 AM deep work sprint</strong>.
+          </p>
+        </div>
+
+        <!-- Metric Gauges -->
+        <div class="flex items-center gap-3 w-full lg:w-auto">
+          <div class="bg-slate-900/90 border border-slate-750 border-slate-700/80 rounded-xl px-4 py-2.5 min-w-[115px] shadow-sm">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Morning Done</span>
+            <span id="metricMorningLogged" class="text-xl font-mono font-bold text-emerald-300">4.75 hrs</span>
+          </div>
+
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 min-w-[115px] shadow-sm">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Deep Planned</span>
+            <span id="metricDeepHours" class="text-xl font-mono font-bold text-amber-300">3.5 hrs</span>
+          </div>
+
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 min-w-[115px] shadow-sm">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Admin / Blitz</span>
+            <span id="metricShallowHours" class="text-xl font-mono font-bold text-cyan-300">1.5 hrs</span>
+          </div>
+
+          <div class="bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 min-w-[115px] shadow-sm">
+            <span class="text-[11px] uppercase font-bold text-slate-300 block tracking-wide">Offloaded</span>
+            <span id="metricOffloadedCount" class="text-xl font-mono font-bold text-indigo-300">5 tasks</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Capacity Progress Bar -->
+      <div class="mt-4 pt-3 border-t border-slate-800">
+        <div class="flex justify-between text-xs text-slate-300 mb-1.5 font-semibold">
+          <span id="barKickoffLabel" class="text-slate-200">10:45 AM Kickoff</span>
+          <span class="text-emerald-300 font-bold" id="barGoldenPeakLabel">Golden Peak</span>
+          <span class="text-sky-300 font-bold" id="barNadirLabel">Circadian Nadir (2:00p)</span>
+          <span class="text-brand-300 font-bold" id="barShutdownLabel">Target Shutdown (5:30 PM)</span>
+        </div>
+        <div class="h-3.5 w-full bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-700 flex relative">
+          <div class="absolute left-[30%] top-0 bottom-0 w-0.5 bg-amber-500/60 z-10"></div>
+          <div class="absolute left-[65%] top-0 bottom-0 w-0.5 bg-sky-500/60 z-10"></div>
+          <div id="capacityProgressBar" class="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-500 to-indigo-500 transition-all duration-500" style="width: 55%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Morning Victory Card (Completed Foundation Routine) -->
+    <section id="morningVictoryCard" class="glass-panel rounded-2xl p-4 border border-emerald-500/40 bg-emerald-950/25">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-300">
+            <i class="fa-solid fa-circle-check text-base"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span id="morningRoutineTitle">Morning Foundation Complete (6:00 AM – 10:45 AM)</span>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">100% Executed</span>
+            </h3>
+            <p id="morningRoutineDesc" class="text-xs text-slate-200 mt-0.5">Meditation → Gym (7–8a) → Family (8–8:55a) → High-Protein Fuel → Shower & Transition.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-emerald-300 font-mono font-semibold">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-dumbbell text-emerald-400"></i> Apple Watch Gym Logged</span>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-battery-full text-emerald-400"></i> Cortisol & Dopamine Primed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Circadian Waveform Canvas -->
+    <section class="glass-panel rounded-2xl p-4 lg:p-5 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-wave-square text-brand-400"></i>
+            <span id="circadianWaveHeader">Circadian Waveform & Ultradian Cycles (6:00 AM – 10:30 PM)</span>
+          </h2>
+          <p id="circadianWaveSubtext" class="text-xs text-slate-300 mt-0.5">Wake at 6:00 AM calibrated via Apple Watch. Click any cycle block to jump to its focus session.</p>
+        </div>
+        
+        <div class="flex items-center gap-3.5 text-xs font-semibold flex-wrap">
+          <span class="flex items-center gap-1.5 text-slate-200">
+            <span class="w-3 h-3 rounded-full bg-amber-400 inline-block shadow-sm"></span> Deep Focus Peak
+          </span>
+          <span class="flex items-center gap-1.5 text-slate-200">
+            <span class="w-3 h-3 rounded-full bg-sky-400 inline-block shadow-sm"></span> Ultradian Trough / NSDR
+          </span>
+          <span class="flex items-center gap-1.5 text-slate-200">
+            <span class="w-3 h-3 rounded-full bg-purple-400 inline-block shadow-sm"></span> Rebound Peak
+          </span>
+        </div>
+      </div>
+
+      <!-- Canvas container with responsive scaling -->
+      <div class="w-full overflow-x-auto pb-1">
+        <div class="min-w-[850px] relative">
+          <canvas id="ultradianCanvas" height="150" class="w-full rounded-xl bg-slate-900 border border-slate-700/80 cursor-pointer shadow-inner"></canvas>
+          <div id="canvasTooltip" class="absolute pointer-events-none hidden px-3 py-1.5 rounded-lg bg-slate-800/95 border border-indigo-400/40 shadow-xl text-xs text-slate-100 z-30 font-medium"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Two-Column Work Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT: Ultradian Cycle Timeline (7 cols) -->
+      <section class="lg:col-span-7 space-y-4">
+        
+        <div class="flex items-center justify-between pb-1">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-indigo-400"></i>
+              <span>Today's Chrono-Slots</span>
+            </h3>
+            <p id="timelineSubtext" class="text-xs text-slate-300">Sequenced from 10:45 AM launch through 5:30 PM shutdown.</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btnCollapseTroughs" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+              <i class="fa-solid fa-arrows-up-down text-[11px] mr-1"></i> Toggle Rest Troughs
+            </button>
+          </div>
+        </div>
+
+        <!-- Render Target for Dynamic Ultradian Cycles -->
+        <div id="timelineContainer" class="space-y-3.5">
+          <!-- Populated by JavaScript -->
+        </div>
+
+      </section>
+
+      <!-- RIGHT: The Weekly Redistribution & Overflow Deck (5 cols) -->
+      <section class="lg:col-span-5 space-y-4">
+
+        <div class="flex items-center justify-between pb-1">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-calendar-days text-amber-400"></i>
+              Weekly Staging & Backlog
+            </h3>
+            <p class="text-xs text-slate-300">Upcoming capacity headroom (Thu – Sat).</p>
+          </div>
+
+          <button id="btnAddNewTaskModal" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-300 text-xs font-bold border border-brand-500/40 transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-plus text-[11px]"></i> New Task
+          </button>
+        </div>
+
+        <!-- Day Selector Tabs -->
+        <div class="grid grid-cols-5 gap-1.5 p-1.5 bg-slate-900 rounded-xl border border-slate-700 text-xs font-bold">
+          <button data-day="thu" class="day-tab active py-2 rounded-lg text-center transition bg-brand-600 text-white shadow">
+            Thu <span class="block text-[11px] font-normal text-slate-200" id="badgeThu">3 items</span>
+          </button>
+          <button data-day="fri" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
+            Fri <span class="block text-[11px] font-normal text-slate-400" id="badgeFri">1 item</span>
+          </button>
+          <button data-day="sat" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
+            Sat <span class="block text-[11px] font-normal text-slate-400" id="badgeSat">1 item</span>
+          </button>
+          <button data-day="sun" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
+            Sun <span class="block text-[11px] font-normal text-slate-400" id="badgeSun">0 items</span>
+          </button>
+          <button data-day="unscheduled" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
+            Inbox <span class="block text-[11px] font-normal text-slate-400" id="badgeInbox">0 items</span>
+          </button>
+        </div>
+
+        <!-- Active Staging Container -->
+        <div class="glass-panel rounded-2xl p-4 space-y-3 min-h-[480px] flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-750 border-slate-700/80 pb-2.5">
+              <div>
+                <h4 id="stagingTitle" class="text-sm font-bold text-white">Thursday, Oct 1 Staging</h4>
+                <p id="stagingDesc" class="text-xs text-slate-300 mt-0.5">Content synthesis & storytelling day (Origin Post & PMI recap).</p>
+              </div>
+              <span id="stagingItemCount" class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-800 text-brand-300 border border-slate-700">
+                3 items
+              </span>
+            </div>
+
+            <!-- Task cards in staging -->
+            <div id="stagingList" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Staging Strategic Advice Note -->
+          <div id="stagingRationaleBox" class="p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200 leading-relaxed shadow-sm">
+            <i class="fa-solid fa-lightbulb text-amber-400 mr-1.5 text-sm"></i>
+            <span id="stagingRationaleText">Video creation and recording should never compete with core career applications on the same day.</span>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- 1. Apple Health & Watch Sats Sync Modal -->
+  <div id="healthModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-3xl p-6 lg:p-7 max-w-lg w-full border border-emerald-500/50 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-750 border-slate-700 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-300 text-lg">
+            <i class="fa-brands fa-apple"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Apple Health & Watch Sats Sync</h3>
+            <p class="text-xs text-slate-300 mt-0.5">Auto-pull daily biometrics, sleep, wake time, and oxygen saturation.</p>
+          </div>
+        </div>
+        <button id="btnCloseHealthModal" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Current Telemetry Details -->
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700">
+          <span class="text-slate-300 text-xs uppercase font-bold block">Oxygen Saturation ("Sats")</span>
+          <span id="modalHealthSats" class="text-2xl font-mono font-bold text-emerald-300 my-0.5 block">98%</span>
+          <span class="text-xs text-slate-400 block">Optimal arterial oxygenation</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700">
+          <span class="text-slate-300 text-xs uppercase font-bold block">Heart Rate Variability</span>
+          <span id="modalHealthHrv" class="text-2xl font-mono font-bold text-indigo-300 my-0.5 block">68 ms</span>
+          <span class="text-xs text-slate-400 block">High parasympathetic recovery</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700">
+          <span class="text-slate-300 text-xs uppercase font-bold block">Resting Heart Rate</span>
+          <span id="modalHealthRhr" class="text-2xl font-mono font-bold text-rose-300 my-0.5 block">52 bpm</span>
+          <span class="text-xs text-slate-400 block">Baseline cardiovascular calm</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700">
+          <span class="text-slate-300 text-xs uppercase font-bold block">Sleep & Wake Recorded</span>
+          <span id="modalHealthWake" class="text-2xl font-mono font-bold text-amber-300 my-0.5 block">6:00 AM</span>
+          <span class="text-xs text-slate-400 block">7.5 hrs sleep duration</span>
+        </div>
+      </div>
+
+      <!-- Quick Test / Calibration Presets -->
+      <div>
+        <label class="block text-slate-300 mb-2 font-bold uppercase tracking-wider text-xs">Test Watch Data Simulation</label>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button type="button" onclick="simulateHealthProfile('today-6am')" class="p-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-left transition">
+            <span class="font-bold text-sm block">Today (6:00a Wake)</span>
+            <span class="text-xs text-emerald-300/90 mt-0.5 block">Sats: 98% • HRV: 68ms • Gym logged</span>
+          </button>
+          <button type="button" onclick="simulateHealthProfile('yesterday-722am')" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-left transition">
+            <span class="font-bold text-sm block">Yesterday (7:22a Wake)</span>
+            <span class="text-xs text-slate-300 mt-0.5 block">Sats: 97% • HRV: 58ms • Shifted slots</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Shortcuts & iCloud Automation Info -->
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200 space-y-2">
+        <div class="flex items-center gap-1.5 font-bold text-amber-300 text-sm">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Automated Daily Sync via Apple Shortcuts</span>
+        </div>
+        <p class="text-slate-300 leading-relaxed">
+          ChronoFlow monitors iCloud Drive (<code class="text-emerald-300 font-mono text-xs font-semibold">iCloud Drive/ChronoFlow/health_today.json</code>) or your local endpoint (<code class="text-emerald-300 font-mono text-xs font-semibold">/api/health/sync</code>).
+        </p>
+        <p class="text-slate-300 leading-relaxed">
+          When your Apple Watch wakes you up, a single Shortcut action saves your stats, auto-adjusts your Ultradian cycles, and primes your focus windows.
+        </p>
+      </div>
+
+      <div class="pt-3 flex items-center justify-between border-t border-slate-700">
+        <button type="button" onclick="copyShortcutConfig()" class="text-indigo-300 hover:text-white font-bold text-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-copy"></i> Copy Shortcut Recipe
+        </button>
+        <button type="button" id="btnCloseHealthModalBottom" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Sleep & Wake Calibration Modal -->
+  <div id="sleepWakeModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-3xl p-6 lg:p-7 max-w-lg w-full border border-amber-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-300 text-base">
+            <i class="fa-solid fa-bed"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Chrono Calibration</h3>
+            <p class="text-xs text-slate-300 mt-0.5">Recalibrate ultradian peaks and troughs to your actual biological wake time.</p>
+          </div>
+        </div>
+        <button id="btnCloseSleepWakeModal" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <!-- Quick Presets -->
+        <div>
+          <label class="block text-slate-300 mb-2 font-bold uppercase tracking-wider text-xs">Quick Presets</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="applyChronoPreset('06:00', '22:30')" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 font-medium transition text-left">
+              <span class="block font-bold text-sm">Today (6:00 AM)</span>
+              <span class="text-xs text-emerald-300">Sleep ~10:30 PM</span>
+            </button>
+            <button type="button" onclick="applyChronoPreset('07:22', '23:00')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium transition text-left">
+              <span class="block font-bold text-sm">Yesterday (7:22 AM)</span>
+              <span class="text-xs text-slate-300">Sleep ~11:00 PM</span>
+            </button>
+            <button type="button" onclick="applyChronoPreset('05:00', '22:00')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium transition text-left">
+              <span class="block font-bold text-sm">Early Bird (5:00 AM)</span>
+              <span class="text-xs text-slate-300">Sleep ~10:00 PM</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Times -->
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Wake Time</label>
+            <input type="time" id="inputWakeTime" value="06:00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Target Bedtime</label>
+            <input type="time" id="inputSleepTime" value="22:30" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <!-- Science Context Note -->
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-xs leading-relaxed space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-amber-300 text-sm">
+            <i class="fa-solid fa-dna"></i>
+            <span id="chronoBioAnchorsTitle">Biological Anchors:</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed" id="chronoBioAnchorsText">
+            • <strong>Caffeine Window:</strong> Delay 90m post-wake for clean adenosine clearance.<br>
+            • <strong>Golden Peak:</strong> Peak vigilance and neurochemical drive for high-impact deep work.<br>
+            • <strong>Circadian Nadir:</strong> Natural post-lunch core temp dip (~8h post-wake). Ideal for NSDR.
+          </p>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-700">
+          <button type="button" id="btnCancelSleepWake" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Close</button>
+          <button type="button" id="btnApplySleepWake" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white font-bold text-xs transition shadow-md">Apply Schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Focus Timer Modal -->
+  <div id="timerModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-3xl p-6 lg:p-8 max-w-md w-full border border-indigo-500/40 shadow-2xl relative">
+      <button id="btnCloseTimer" class="absolute top-4 right-4 text-slate-400 hover:text-white transition p-2">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="text-center space-y-2">
+        <span id="timerPhaseBadge" class="text-xs uppercase tracking-widest font-extrabold px-3 py-1 rounded-full bg-amber-500/25 text-amber-300 border border-amber-500/40">
+          Cycle 1: Golden Midday Peak
+        </span>
+        <h3 id="timerTaskTitle" class="text-xl font-bold text-white mt-1">Product Breakdown Clips</h3>
+        <p class="text-xs text-slate-300">Deep, uninterrupted ultradian execution block.</p>
+      </div>
+
+      <!-- Circular Timer Display -->
+      <div class="my-8 flex flex-col items-center justify-center relative">
+        <div class="w-60 h-60 rounded-full border-4 border-slate-700 flex items-center justify-center relative overflow-hidden bg-slate-900/90 shadow-2xl">
+          <div id="timerRingFill" class="absolute inset-0 bg-gradient-to-t from-brand-600/30 to-transparent transition-all"></div>
+          <div class="text-center z-10">
+            <span id="timerCountdown" class="text-6xl font-mono font-bold text-white tracking-tighter">90:00</span>
+            <span id="timerModeLabel" class="block text-xs uppercase font-extrabold text-slate-300 mt-1.5 tracking-wider">Remaining</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timer Controls -->
+      <div class="flex items-center justify-center gap-3">
+        <button id="btnTimerToggle" class="px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold shadow-lg shadow-indigo-500/30 transition flex items-center gap-2">
+          <i id="timerIconPlay" class="fa-solid fa-play"></i>
+          <span id="timerBtnText">Start Cycle</span>
+        </button>
+        <button id="btnTimerReset" class="p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition" title="Reset Timer">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        <button id="btnSoundTest" class="p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-400 transition" title="Test Gong/Tone Chime">
+          <i class="fa-solid fa-bell"></i>
+        </button>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="mt-6 pt-4 border-t border-slate-700 text-center text-xs text-slate-300 font-medium">
+        <i class="fa-solid fa-shield-halved text-brand-400 mr-1.5"></i> Fullscreen mode • Put phone in another room.
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. OmniFocus Batch Sync & Live Bridge Modal -->
+  <div id="omniModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-3xl p-6 lg:p-7 max-w-2xl w-full border border-indigo-500/40 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-300 text-base">
+            <i class="fa-solid fa-terminal"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">OmniFocus Triage Batch Actions</h3>
+            <p class="text-xs text-slate-300 mt-0.5">Apply schedule deferrals and energy-caps to OmniFocus 4.</p>
+          </div>
+        </div>
+        <button id="btnCloseOmni" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
+        <div class="bg-slate-900 rounded-xl p-3.5 border border-slate-700 space-y-1">
+          <span class="font-bold text-amber-300 block uppercase tracking-wider text-xs">1. Defer heavy blocks out of Today:</span>
+          <p class="text-slate-200 leading-relaxed">Push changes directly to OmniFocus 4 using the Mac AppleScript bridge, or copy the batch plan.</p>
+        </div>
+
+        <div id="omniActionList" class="space-y-2.5 font-mono">
+          <!-- Populated by script -->
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-700 flex items-center justify-between gap-3 flex-wrap">
+        <span id="copyToast" class="text-xs text-emerald-400 font-bold opacity-0 transition-opacity">
+          ✓ Copied to clipboard!
+        </span>
+        <div class="flex items-center gap-2">
+          <button id="btnPushToOmni" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-md">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Push Live to OmniFocus</span>
+          </button>
+          <button id="btnCopyOmniText" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs transition flex items-center gap-2">
+            <i class="fa-solid fa-copy"></i>
+            <span>Copy Plan Text</span>
+          </button>
+          <button id="btnCloseOmniBottom" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Task Edit Modal -->
+  <div id="taskModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-3xl p-6 max-w-lg w-full border border-indigo-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 id="taskModalTitle" class="text-base font-bold text-white">Edit Task Assignment</h3>
+        <button id="btnCloseTaskModal" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="taskForm" class="space-y-4 text-xs">
+        <input type="hidden" id="taskEditId">
+
+        <div>
+          <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Task Title</label>
+          <input type="text" id="taskEditTitle" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Project</label>
+            <input type="text" id="taskEditProject" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Duration (Minutes)</label>
+            <input type="number" id="taskEditDuration" min="5" max="360" step="5" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Assigned Slot / Day</label>
+            <select id="taskEditTarget" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+              <optgroup label="Today Ultradian Cycles">
+                <option value="c1">Cycle 1 (Golden Midday Peak)</option>
+                <option value="t1">Trough 1 (Decompression)</option>
+                <option value="c2">Cycle 2 (High Execution Peak)</option>
+                <option value="nadir">Circadian Nadir (NSDR)</option>
+                <option value="c3">Cycle 3 (Outreach & Admin Blitz)</option>
+                <option value="t2">Trough 2 (Walk & Sun)</option>
+                <option value="c4">Cycle 4 (Rebound Intake)</option>
+                <option value="shutdown">Shutdown Ritual</option>
+              </optgroup>
+              <optgroup label="Weekly Reschedule Days">
+                <option value="thu">Thursday, Oct 1</option>
+                <option value="fri">Friday, Oct 2</option>
+                <option value="sat">Saturday, Oct 3</option>
+                <option value="sun">Sunday, Oct 4</option>
+                <option value="unscheduled">Inbox / Unassigned</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Cognitive Tier</label>
+            <select id="taskEditType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+              <option value="deep">Deep Work (High Cognitive Load)</option>
+              <option value="admin">Admin / Shallow Blitz</option>
+              <option value="habit">Quick Habit / Ritual</option>
+              <option value="physical">Heavy Physical Effort</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Tags / Context</label>
+          <input type="text" id="taskEditTags" placeholder="e.g. PA. Top, P5. Freedom" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="pt-3 flex items-center justify-between border-t border-slate-700">
+          <button type="button" id="btnDeleteTask" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">
+            <i class="fa-solid fa-trash mr-1.5"></i> Delete
+          </button>
+          <div class="flex gap-2.5">
+            <button type="button" id="btnCancelTask" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold">Cancel</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div id="appToast" class="fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl glass-panel border border-brand-500/50 text-white text-xs font-bold shadow-2xl flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i class="fa-solid fa-circle-info text-brand-400 text-sm"></i>
+    <span id="appToastText">Notification</span>
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="/js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.debug('ServiceWorker registration optional bypass:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

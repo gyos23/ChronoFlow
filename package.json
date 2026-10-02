@@ -1,0 +1,25 @@
+{
+  "name": "chronoflow",
+  "version": "1.0.0",
+  "description": "Ultradian Rhythm & Task Triage Studio with OmniFocus and Apple Health/Watch integrations",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ultradian",
+    "circadian",
+    "omnifocus",
+    "apple-health",
+    "apple-watch",
+    "productivity",
+    "triage"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}
