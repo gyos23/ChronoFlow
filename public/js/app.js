@@ -479,10 +479,30 @@ function applyHealthData(data) {
   state.health.source = data.source || "Apple Watch";
   state.health.lastSynced = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  if (data.wakeTime && data.wakeTime !== state.wakeTime) {
-    state.wakeTime = data.wakeTime;
-    if (data.bedTime) state.sleepTime = data.bedTime;
-    ULTRADIAN_SLOTS = generateUltradianSlots(state.wakeTime, state.sleepTime);
+  const incomingWake = data.wakeTime || data.wake || data.wake_time;
+  if (incomingWake) {
+    let clean = String(incomingWake).trim();
+    if (clean.includes('T')) {
+      const d = new Date(clean);
+      if (!isNaN(d.getTime())) {
+        clean = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      }
+    }
+    const match12 = clean.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?/i);
+    if (match12) {
+      let h = parseInt(match12[1], 10);
+      const m = match12[2];
+      const ampm = match12[3] ? match12[3].toLowerCase() : null;
+      if (ampm === 'pm' && h < 12) h += 12;
+      if (ampm === 'am' && h === 12) h = 0;
+      clean = `${String(h).padStart(2, '0')}:${m}`;
+    }
+
+    if (clean !== state.wakeTime) {
+      state.wakeTime = clean;
+      if (data.bedTime) state.sleepTime = data.bedTime;
+      ULTRADIAN_SLOTS = generateUltradianSlots(state.wakeTime, state.sleepTime);
+    }
   }
 
   renderApp();
