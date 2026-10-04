@@ -106,6 +106,19 @@ function generateUltradianSlots(wakeTimeStr = '06:00', sleepTimeStr = '22:30') {
 
   return [
     {
+      id: 'foundation',
+      title: 'Morning Foundation & Priming',
+      timeRange: getWindow(0, startOffsetC1),
+      durationMins: startOffsetC1,
+      startOffset: 0,
+      type: 'habit',
+      phaseName: 'Physiological Priming (Gym & Adenosine Clearance)',
+      color: 'from-emerald-500/20 to-teal-500/10',
+      borderColor: 'border-emerald-500/40',
+      badgeColor: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/40',
+      description: 'Morning physical training, sunlight exposure, hydration, and clean adenosine clearance before deep work kickoff.'
+    },
+    {
       id: 'c1',
       title: 'Cycle 1: The Golden Midday Peak',
       timeRange: getWindow(c1Start, c1Dur),
@@ -840,8 +853,13 @@ function updatePhaseBadge() {
   });
 
   if (currentSlot) {
-    badge.textContent = `${currentSlot.title} (${currentSlot.phaseName})`;
-    badge.className = currentSlot.type === 'deep' ? "text-amber-300 font-bold" : "text-sky-300 font-bold";
+    if (currentSlot.id === 'foundation') {
+      badge.textContent = `Morning Foundation (Kickoff at ${minutesToTimeStr(wakeM + currentSlot.durationMins)})`;
+      badge.className = "text-emerald-300 font-bold";
+    } else {
+      badge.textContent = `${currentSlot.title} (${currentSlot.phaseName})`;
+      badge.className = currentSlot.type === 'deep' ? "text-amber-300 font-bold" : "text-sky-300 font-bold";
+    }
   } else {
     badge.textContent = "Evening Wind-Down & Restoration";
     badge.className = "text-indigo-300 font-bold";
@@ -1329,6 +1347,32 @@ function drawUltradianWave() {
     ctx.fillStyle = textColor;
     ctx.fillText(slotCode, x1 + 7, 26);
   });
+
+  // Current Time Indicator on Canvas
+  const now = new Date();
+  const currentMinOfDay = now.getHours() * 60 + now.getMinutes();
+  const elapsedFromWake = currentMinOfDay - wakeMinutes;
+  if (elapsedFromWake >= 0 && elapsedFromWake <= totalMinutes) {
+    const curX = (elapsedFromWake / totalMinutes) * width;
+    ctx.beginPath();
+    ctx.moveTo(curX, 0);
+    ctx.lineTo(curX, height - 25);
+    ctx.strokeStyle = '#f43f5e';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Indicator head
+    ctx.fillStyle = '#f43f5e';
+    ctx.beginPath();
+    ctx.arc(curX, 10, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = 'bold 9px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#fecdd3';
+    ctx.fillText('NOW', Math.min(curX + 5, width - 30), 20);
+  }
 }
 
 window.addEventListener('resize', drawUltradianWave);
