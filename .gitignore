@@ -34,3 +34,5 @@ data/omnifocus_export_temp.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+.vercel
+.env*

@@ -20,14 +20,24 @@ module.exports = async (req, res) => {
     }
 
     const existing = await getHealth();
+    let rawSats = body.sats ?? body.oxygen ?? body.spo2 ?? body.bloodOxygen ?? existing.sats;
+    if (rawSats !== undefined && rawSats !== null) {
+      let num = Number(rawSats);
+      // If shortcut sends decimal e.g. 0.98 instead of 98%, convert it to percentage
+      if (num > 0 && num <= 1) {
+        num = Math.round(num * 100);
+      }
+      rawSats = Math.round(num);
+    }
+
     const updated = {
       ...existing,
       ...body,
       date: body.date || new Date().toISOString().split('T')[0],
-      sats: body.sats !== undefined ? Number(body.sats) : existing.sats,
+      sats: rawSats !== undefined ? rawSats : existing.sats,
       wakeTime: body.wakeTime || existing.wakeTime,
       bedTime: body.bedTime || existing.bedTime,
-      restingHeartRate: body.restingHeartRate !== undefined ? Number(body.restingHeartRate) : existing.restingHeartRate,
+      restingHeartRate: (body.restingHeartRate ?? body.rhr) !== undefined ? Number(body.restingHeartRate ?? body.rhr) : existing.restingHeartRate,
       hrv: body.hrv !== undefined ? Number(body.hrv) : existing.hrv,
       source: body.source || "Apple Watch Sync",
       lastSynced: new Date().toISOString()

@@ -184,15 +184,24 @@ const server = http.createServer((req, res) => {
 
       try {
         const existing = fs.existsSync(HEALTH_FILE) ? JSON.parse(fs.readFileSync(HEALTH_FILE, 'utf8')) : DEFAULT_HEALTH;
+        let rawSats = body.sats ?? body.oxygen ?? body.spo2 ?? body.bloodOxygen ?? existing.sats;
+        if (rawSats !== undefined && rawSats !== null) {
+          let num = Number(rawSats);
+          if (num > 0 && num <= 1) {
+            num = Math.round(num * 100);
+          }
+          rawSats = Math.round(num);
+        }
+
         const updated = {
           ...existing,
           ...body,
           date: body.date || new Date().toISOString().split('T')[0],
-          sats: body.sats !== undefined ? Number(body.sats) : existing.sats,
+          sats: rawSats !== undefined ? rawSats : existing.sats,
           wakeTime: body.wakeTime || existing.wakeTime,
           bedTime: body.bedTime || existing.bedTime,
-          restingHeartRate: body.restingHeartRate || existing.restingHeartRate,
-          hrv: body.hrv || existing.hrv,
+          restingHeartRate: (body.restingHeartRate ?? body.rhr) !== undefined ? Number(body.restingHeartRate ?? body.rhr) : existing.restingHeartRate,
+          hrv: body.hrv !== undefined ? Number(body.hrv) : existing.hrv,
           source: body.source || "Apple Watch Sync",
           lastSynced: new Date().toISOString()
         };
