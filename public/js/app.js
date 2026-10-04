@@ -40,6 +40,40 @@ function minutesToTimeStr(mins) {
   return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
+// Dynamic Upcoming Calendar Days (Tomorrow + 4 days forward)
+function getUpcomingDays() {
+  const days = [];
+  const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNamesFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  for (let offset = 1; offset <= 4; offset++) {
+    const d = new Date();
+    d.setDate(d.getDate() + offset);
+    const dayOfWeek = d.getDay();
+    const key = `day_${offset}`;
+    const shortDay = dayNamesShort[dayOfWeek];
+    const fullDay = dayNamesFull[dayOfWeek];
+    const dateNum = d.getDate();
+    const month = monthNames[d.getMonth()];
+    
+    days.push({
+      key: key,
+      offset: offset,
+      shortLabel: shortDay,
+      fullTitle: `${fullDay}, ${month} ${dateNum} Staging`,
+      dateDisplay: `${fullDay}, ${month} ${dateNum}`,
+      desc: offset === 1 
+        ? `Upcoming priority execution day (${fullDay}).`
+        : `Capacity headroom & secondary staging (${fullDay}).`,
+      rationale: offset === 1
+        ? `Staging non-critical loops into ${fullDay} keeps today's cognitive bandwidth protected.`
+        : `Safely deferred to ${fullDay} so your working memory stays focused on today.`
+    });
+  }
+  return days;
+}
+
 // Dynamic Ultradian Slots Generator tailored to biological wake time
 function generateUltradianSlots(wakeTimeStr = '06:00', sleepTimeStr = '22:30') {
   const wakeM = timeStringToMinutes(wakeTimeStr);
@@ -306,7 +340,7 @@ const INITIAL_TASKS = [
     project: "🔴 1. Sell 300 Planners 📖",
     tags: ["PA. Top", "P5. Freedom", "T3. High"],
     duration: 60,
-    slot: "thu",
+    slot: "day_1",
     type: "deep",
     status: "pending",
     isDueToday: true,
@@ -319,7 +353,7 @@ const INITIAL_TASKS = [
     project: "📆 Day 2 Day",
     tags: ["P4. Forward", "PB. High", "T2. Manageable"],
     duration: 45,
-    slot: "thu",
+    slot: "day_1",
     type: "admin",
     status: "pending",
     isDueToday: false,
@@ -332,7 +366,7 @@ const INITIAL_TASKS = [
     project: "🔴 1. Sell 300 Planners 📖",
     tags: ["PB. High", "P5. Freedom", "T3. High"],
     duration: 90,
-    slot: "thu",
+    slot: "day_1",
     type: "deep",
     status: "pending",
     isDueToday: true,
@@ -345,7 +379,7 @@ const INITIAL_TASKS = [
     project: "📆 Day 2 Day",
     tags: ["PC. Normal", "E1. Low", "P5. Freedom"],
     duration: 60,
-    slot: "fri",
+    slot: "day_2",
     type: "deep",
     status: "pending",
     isDueToday: false,
@@ -359,7 +393,7 @@ let state = {
   wakeTime: '06:00',
   sleepTime: '22:30',
   tasks: JSON.parse(JSON.stringify(INITIAL_TASKS)),
-  activeDayTab: 'thu',
+  activeDayTab: 'day_1',
   showTroughs: true,
   omniLive: false,
   health: {
@@ -483,10 +517,10 @@ function ingestOmniFocusTasks(incomingTasks) {
     'm5Sur6ZgUjs': 'c4', // Study Learning Techniques
     'n52EFrMy8S2': 'c4', // Post mortem
     'i4FgSBIPm3m': 'shutdown', // Time box
-    'aaAhMNh8HpY': 'thu', // Draft & schedule origin post
-    'gSJe1tSsKCY': 'thu', // Synthesize pmi
-    'ieb6qJDeADF': 'thu', // Publish newsletter
-    'celrrIQIQlu': 'fri'  // Continue exploring videos
+    'aaAhMNh8HpY': 'day_1', // Draft & schedule origin post
+    'gSJe1tSsKCY': 'day_1', // Synthesize pmi
+    'ieb6qJDeADF': 'day_1', // Publish newsletter
+    'celrrIQIQlu': 'day_2'  // Continue exploring videos
   };
 
   processed.forEach(t => {
@@ -598,7 +632,8 @@ async function fetchOmniTasks(isManualClick = false) {
 
 // Push Batch Actions Live to OmniFocus
 async function pushOmniFocusUpdates() {
-  const offloaded = state.tasks.filter(t => ['thu', 'fri', 'sat', 'sun'].includes(t.slot));
+  const stagingKeys = ['day_1', 'day_2', 'day_3', 'day_4', 'thu', 'fri', 'sat', 'sun'];
+  const offloaded = state.tasks.filter(t => stagingKeys.includes(t.slot));
   if (offloaded.length === 0) {
     showToast("No rescheduled tasks to push.");
     return;
@@ -606,10 +641,13 @@ async function pushOmniFocusUpdates() {
 
   const updates = offloaded.map(t => {
     let deferDate = new Date();
-    if (t.slot === 'thu') deferDate.setDate(deferDate.getDate() + 1);
-    if (t.slot === 'fri') deferDate.setDate(deferDate.getDate() + 2);
-    if (t.slot === 'sat') deferDate.setDate(deferDate.getDate() + 3);
-    if (t.slot === 'sun') deferDate.setDate(deferDate.getDate() + 4);
+    let offset = 1;
+    if (t.slot === 'day_1' || t.slot === 'thu') offset = 1;
+    else if (t.slot === 'day_2' || t.slot === 'fri') offset = 2;
+    else if (t.slot === 'day_3' || t.slot === 'sat') offset = 3;
+    else if (t.slot === 'day_4' || t.slot === 'sun') offset = 4;
+    
+    deferDate.setDate(deferDate.getDate() + offset);
     deferDate.setHours(9, 0, 0, 0);
 
     return {
@@ -811,8 +849,9 @@ function updatePhaseBadge() {
 }
 
 function renderDiagnostics() {
-  const todayTasks = state.tasks.filter(t => !['thu', 'fri', 'sat', 'sun', 'unscheduled'].includes(t.slot));
-  const offloadedTasks = state.tasks.filter(t => ['thu', 'fri', 'sat', 'sun'].includes(t.slot));
+  const stagingKeys = ['day_1', 'day_2', 'day_3', 'day_4', 'thu', 'fri', 'sat', 'sun'];
+  const todayTasks = state.tasks.filter(t => !stagingKeys.includes(t.slot) && t.slot !== 'unscheduled');
+  const offloadedTasks = state.tasks.filter(t => stagingKeys.includes(t.slot));
   const dueCount = state.tasks.filter(t => t.isDueToday).length;
   const plannedCount = state.tasks.filter(t => t.isPlannedToday).length;
 
@@ -858,11 +897,68 @@ function renderDiagnostics() {
     if (desc) desc.innerHTML = `OmniFocus synced: <strong>${todayTasks.length} tasks</strong> (${dueCount} due, ${plannedCount} planned). High-leverage blocks aligned with natural neurochemistry.`;
   }
 
-  ['thu', 'fri', 'sat', 'sun', 'unscheduled'].forEach(day => {
-    const count = state.tasks.filter(t => t.slot === day).length;
-    const badgeId = day === 'unscheduled' ? 'badgeInbox' : `badge${day.charAt(0).toUpperCase() + day.slice(1)}`;
-    const el = document.getElementById(badgeId);
-    if (el) el.textContent = `${count} ${count === 1 ? 'item' : 'items'}`;
+  renderDaySelectorTabs();
+}
+
+function renderDaySelectorTabs() {
+  const container = document.getElementById('daySelectorTabs');
+  if (!container) return;
+
+  const upcoming = getUpcomingDays();
+  const daysList = [
+    ...upcoming.map(d => ({ key: d.key, label: d.shortLabel, isInbox: false })),
+    { key: 'unscheduled', label: 'Inbox', isInbox: true }
+  ];
+
+  const subtextEl = document.getElementById('stagingUpcomingSubtext');
+  if (subtextEl && upcoming.length >= 2) {
+    subtextEl.textContent = `Upcoming capacity headroom (${upcoming[0].shortLabel} – ${upcoming[upcoming.length - 1].shortLabel}).`;
+  }
+
+  const modalOptGroup = document.getElementById('taskEditDaysGroup');
+  if (modalOptGroup) {
+    modalOptGroup.innerHTML = `
+      ${upcoming.map(d => `<option value="${d.key}">${d.dateDisplay}</option>`).join('')}
+      <option value="unscheduled">Inbox / Unassigned</option>
+    `;
+  }
+
+  container.innerHTML = '';
+  daysList.forEach(item => {
+    const isActive = state.activeDayTab === item.key || (item.key === 'day_1' && ['thu'].includes(state.activeDayTab)) || (item.key === 'day_2' && ['fri'].includes(state.activeDayTab));
+    let count = 0;
+    if (item.isInbox) {
+      count = state.tasks.filter(t => t.slot === 'unscheduled').length;
+    } else {
+      count = state.tasks.filter(t => {
+        if (t.slot === item.key) return true;
+        if (item.key === 'day_1' && t.slot === 'thu') return true;
+        if (item.key === 'day_2' && t.slot === 'fri') return true;
+        if (item.key === 'day_3' && t.slot === 'sat') return true;
+        if (item.key === 'day_4' && t.slot === 'sun') return true;
+        return false;
+      }).length;
+    }
+
+    const btn = document.createElement('button');
+    btn.dataset.day = item.key;
+    btn.className = isActive
+      ? "day-tab active py-2 rounded-lg text-center transition bg-brand-600 text-white shadow"
+      : "day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white";
+
+    btn.innerHTML = `
+      ${item.label}
+      <span class="block text-[11px] font-normal ${isActive ? 'text-slate-200' : 'text-slate-400'}">
+        ${count} ${count === 1 ? 'item' : 'items'}
+      </span>
+    `;
+
+    btn.addEventListener('click', () => {
+      state.activeDayTab = item.key;
+      renderApp();
+    });
+
+    container.appendChild(btn);
   });
 }
 
@@ -944,7 +1040,7 @@ function renderTimeline() {
               <button onclick="openEditTaskModal('${task.id}')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition text-xs" title="Edit Task">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
-              <button onclick="quickReschedule('${task.id}', 'thu')" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-900/60 text-slate-300 hover:text-brand-300 transition text-xs" title="Defer to Thursday">
+              <button onclick="quickReschedule('${task.id}', 'day_1')" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-900/60 text-slate-300 hover:text-brand-300 transition text-xs" title="Defer to Tomorrow">
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
@@ -967,40 +1063,43 @@ function renderStaging() {
   const rationaleEl = document.getElementById('stagingRationaleText');
   const countEl = document.getElementById('stagingItemCount');
 
-  const dayConfigs = {
-    thu: {
-      title: 'Thursday, Oct 1 Staging',
-      desc: 'Content storytelling day (Origin Post & PMI recap).',
-      rationale: 'Scripting the origin reel and synthesizing PMI events benefits from Thursday’s fresh cognitive slate.'
-    },
-    fri: {
-      title: 'Friday, Oct 2 Staging',
-      desc: 'Weekly closing rituals & financial audit.',
-      rationale: 'Reviewing finances is an end-of-week reflection habit, perfectly staged for Friday afternoon.'
-    },
-    sat: {
-      title: 'Saturday, Oct 3 Staging',
-      desc: 'High physical stamina / Low screen day (Deep Room Purge).',
-      rationale: 'A 3-hour physical room overhaul is best completed on Saturday morning when high mental bandwidth isn’t required.'
-    },
-    sun: {
-      title: 'Sunday, Oct 4 Staging',
-      desc: 'Weekly Planning & Prep.',
-      rationale: 'Light preparation and staging for the upcoming week.'
-    },
-    unscheduled: {
-      title: 'OmniFocus Backlog / Inbox',
-      desc: 'Tasks awaiting triage slot assignment.',
-      rationale: 'Assign to a specific peak or defer out to avoid keeping open loops in active working memory.'
-    }
+  const upcoming = getUpcomingDays();
+  const dayConfigMap = {};
+  upcoming.forEach(d => {
+    dayConfigMap[d.key] = {
+      title: d.fullTitle,
+      desc: d.desc,
+      rationale: d.rationale
+    };
+  });
+  dayConfigMap['unscheduled'] = {
+    title: 'OmniFocus Backlog / Inbox',
+    desc: 'Tasks awaiting triage slot assignment.',
+    rationale: 'Assign to a specific peak or defer out to avoid keeping open loops in active working memory.'
   };
 
-  const config = dayConfigs[day] || dayConfigs.thu;
+  // Support legacy keys if selected
+  if (day === 'thu') state.activeDayTab = 'day_1';
+  if (day === 'fri') state.activeDayTab = 'day_2';
+  if (day === 'sat') state.activeDayTab = 'day_3';
+  if (day === 'sun') state.activeDayTab = 'day_4';
+
+  const activeKey = state.activeDayTab;
+  const config = dayConfigMap[activeKey] || dayConfigMap['day_1'] || dayConfigMap['unscheduled'];
+
   if (titleEl) titleEl.textContent = config.title;
   if (descEl) descEl.textContent = config.desc;
   if (rationaleEl) rationaleEl.textContent = config.rationale;
 
-  const items = state.tasks.filter(t => t.slot === day);
+  const items = state.tasks.filter(t => {
+    if (t.slot === activeKey) return true;
+    if (activeKey === 'day_1' && t.slot === 'thu') return true;
+    if (activeKey === 'day_2' && t.slot === 'fri') return true;
+    if (activeKey === 'day_3' && t.slot === 'sat') return true;
+    if (activeKey === 'day_4' && t.slot === 'sun') return true;
+    return false;
+  });
+
   if (countEl) countEl.textContent = `${items.length} ${items.length === 1 ? 'item' : 'items'}`;
 
   if (!listEl) return;
@@ -1051,12 +1150,18 @@ function renderOmniModal() {
   const listEl = document.getElementById('omniActionList');
   if (!listEl) return;
 
-  const offloaded = state.tasks.filter(t => ['thu', 'fri', 'sat', 'sun'].includes(t.slot));
+  const stagingKeys = ['day_1', 'day_2', 'day_3', 'day_4', 'thu', 'fri', 'sat', 'sun'];
+  const offloaded = state.tasks.filter(t => stagingKeys.includes(t.slot));
+  const upcoming = getUpcomingDays();
   const dayNames = {
-    thu: 'Thursday, Oct 1',
-    fri: 'Friday, Oct 2',
-    sat: 'Saturday, Oct 3',
-    sun: 'Sunday, Oct 4'
+    day_1: upcoming[0]?.dateDisplay || 'Tomorrow',
+    day_2: upcoming[1]?.dateDisplay || 'In 2 days',
+    day_3: upcoming[2]?.dateDisplay || 'In 3 days',
+    day_4: upcoming[3]?.dateDisplay || 'In 4 days',
+    thu: upcoming[0]?.dateDisplay || 'Upcoming Day',
+    fri: upcoming[1]?.dateDisplay || 'Upcoming Day',
+    sat: upcoming[2]?.dateDisplay || 'Upcoming Day',
+    sun: upcoming[3]?.dateDisplay || 'Upcoming Day'
   };
 
   listEl.innerHTML = '';
@@ -1267,10 +1372,10 @@ function setupEventListeners() {
         'm5Sur6ZgUjs': 'c4', // Study Learning Techniques
         'n52EFrMy8S2': 'c4', // Post mortem
         'i4FgSBIPm3m': 'shutdown', // Time box
-        'aaAhMNh8HpY': 'thu', // Draft & schedule origin post
-        'gSJe1tSsKCY': 'thu', // Synthesize pmi
-        'ieb6qJDeADF': 'thu', // Publish newsletter
-        'celrrIQIQlu': 'fri'  // Continue exploring videos
+        'aaAhMNh8HpY': 'day_1', // Draft & schedule origin post
+        'gSJe1tSsKCY': 'day_1', // Synthesize pmi
+        'ieb6qJDeADF': 'day_1', // Publish newsletter
+        'celrrIQIQlu': 'day_2'  // Continue exploring videos
       };
 
       state.tasks.forEach(t => {
@@ -1295,7 +1400,7 @@ function setupEventListeners() {
             t.slot = 'c4';
             slotMinutes.c4 += dur;
           } else {
-            t.slot = 'thu';
+            t.slot = 'day_1';
           }
         } else {
           t.slot = 'unscheduled';
@@ -1473,7 +1578,10 @@ function quickReschedule(taskId, targetSlot) {
     task.slot = targetSlot;
     playChime("C5", "16n");
     renderApp();
-    showToast(`Deferred "${task.title.slice(0, 24)}..." to ${targetSlot.toUpperCase()}`);
+    const upcoming = getUpcomingDays();
+    const targetDayObj = upcoming.find(d => d.key === targetSlot);
+    const label = targetDayObj ? targetDayObj.shortLabel : targetSlot.toUpperCase();
+    showToast(`Deferred "${task.title.slice(0, 24)}..." to ${label}`);
   }
 }
 
@@ -1615,12 +1723,18 @@ function resetTimer() {
 }
 
 function copyOmniPlanText() {
-  const offloaded = state.tasks.filter(t => ['thu', 'fri', 'sat', 'sun'].includes(t.slot));
+  const stagingKeys = ['day_1', 'day_2', 'day_3', 'day_4', 'thu', 'fri', 'sat', 'sun'];
+  const offloaded = state.tasks.filter(t => stagingKeys.includes(t.slot));
+  const upcoming = getUpcomingDays();
   const dayNames = {
-    thu: 'Thursday, Oct 1',
-    fri: 'Friday, Oct 2',
-    sat: 'Saturday, Oct 3',
-    sun: 'Sunday, Oct 4'
+    day_1: upcoming[0]?.dateDisplay || 'Tomorrow',
+    day_2: upcoming[1]?.dateDisplay || 'In 2 days',
+    day_3: upcoming[2]?.dateDisplay || 'In 3 days',
+    day_4: upcoming[3]?.dateDisplay || 'In 4 days',
+    thu: upcoming[0]?.dateDisplay || 'Upcoming Day',
+    fri: upcoming[1]?.dateDisplay || 'Upcoming Day',
+    sat: upcoming[2]?.dateDisplay || 'Upcoming Day',
+    sun: upcoming[3]?.dateDisplay || 'Upcoming Day'
   };
 
   let text = `CHRONOFLOW OMNIFOCUS TRIAGE ACTIONS (${state.wakeTime} Wake Calibration):\n\n`;
@@ -1646,6 +1760,13 @@ function updateClock() {
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const clockEl = document.getElementById('headerTimeClock');
   if (clockEl) clockEl.textContent = timeStr;
+
+  const dateEl = document.getElementById('headerDateDisplay');
+  if (dateEl) {
+    const options = { weekday: 'long', month: 'short', day: 'numeric' };
+    dateEl.textContent = now.toLocaleDateString(undefined, options);
+  }
+
   updatePhaseBadge();
 }
 

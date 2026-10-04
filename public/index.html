@@ -81,7 +81,7 @@
           </div>
           <p class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
             <i class="fa-regular fa-calendar-check text-slate-400"></i>
-            <span id="headerDateDisplay" class="text-slate-200 font-semibold">Wednesday, Sep 30</span>
+            <span id="headerDateDisplay" class="text-slate-200 font-semibold">Today</span>
             <span class="text-slate-500">•</span>
             <span id="headerTimeClock" class="font-mono text-white font-semibold">10:45 AM</span>
             <span class="text-slate-500">•</span>
@@ -343,7 +343,7 @@
               <i class="fa-solid fa-calendar-days text-amber-400"></i>
               Weekly Staging & Backlog
             </h3>
-            <p class="text-xs text-slate-300">Upcoming capacity headroom (Thu – Sat).</p>
+            <p id="stagingUpcomingSubtext" class="text-xs text-slate-300">Upcoming capacity headroom.</p>
           </div>
 
           <button id="btnAddNewTaskModal" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-300 text-xs font-bold border border-brand-500/40 transition flex items-center gap-1.5 shadow-sm">
@@ -352,22 +352,7 @@
         </div>
 
         <!-- Day Selector Tabs -->
-        <div class="grid grid-cols-5 gap-1.5 p-1.5 bg-slate-900 rounded-xl border border-slate-700 text-xs font-bold">
-          <button data-day="thu" class="day-tab active py-2 rounded-lg text-center transition bg-brand-600 text-white shadow">
-            Thu <span class="block text-[11px] font-normal text-slate-200" id="badgeThu">3 items</span>
-          </button>
-          <button data-day="fri" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
-            Fri <span class="block text-[11px] font-normal text-slate-400" id="badgeFri">1 item</span>
-          </button>
-          <button data-day="sat" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
-            Sat <span class="block text-[11px] font-normal text-slate-400" id="badgeSat">1 item</span>
-          </button>
-          <button data-day="sun" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
-            Sun <span class="block text-[11px] font-normal text-slate-400" id="badgeSun">0 items</span>
-          </button>
-          <button data-day="unscheduled" class="day-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
-            Inbox <span class="block text-[11px] font-normal text-slate-400" id="badgeInbox">0 items</span>
-          </button>
+        <div id="daySelectorTabs" class="grid grid-cols-5 gap-1.5 p-1.5 bg-slate-900 rounded-xl border border-slate-700 text-xs font-bold">
         </div>
 
         <!-- Active Staging Container -->
@@ -695,11 +680,11 @@
                 <option value="c4">Cycle 4 (Rebound Intake)</option>
                 <option value="shutdown">Shutdown Ritual</option>
               </optgroup>
-              <optgroup label="Weekly Reschedule Days">
-                <option value="thu">Thursday, Oct 1</option>
-                <option value="fri">Friday, Oct 2</option>
-                <option value="sat">Saturday, Oct 3</option>
-                <option value="sun">Sunday, Oct 4</option>
+              <optgroup id="taskEditDaysGroup" label="Upcoming Days">
+                <option value="d1">Tomorrow</option>
+                <option value="d2">Day After Tomorrow</option>
+                <option value="d3">In 3 Days</option>
+                <option value="d4">In 4 Days</option>
                 <option value="unscheduled">Inbox / Unassigned</option>
               </optgroup>
             </select>
