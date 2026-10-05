@@ -403,19 +403,19 @@ const INITIAL_TASKS = [
 
 // App State
 let state = {
-  wakeTime: '06:00',
+  wakeTime: '07:14',
   sleepTime: '22:30',
   tasks: JSON.parse(JSON.stringify(INITIAL_TASKS)),
   activeDayTab: 'day_1',
   showTroughs: true,
   omniLive: false,
   health: {
-    sats: 98,
-    hrv: 68,
+    sats: 97,
+    hrv: 38,
     rhr: 52,
-    sleepDuration: 7.5,
-    readiness: 92,
-    source: "Apple Watch (Auto-Synced)",
+    sleepDuration: "7:01",
+    readiness: 88,
+    source: "Apple Watch Sync",
     workoutLogged: true,
     lastSynced: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   },
@@ -456,28 +456,57 @@ function setupSSE() {
   }
 }
 
-// Fetch Apple Health from API
+// Fetch Apple Health from API with localStorage fallback & self-healing
 async function fetchHealthStats() {
+  // 1. Immediately hydrate from localStorage if user previously received a watch sync
+  try {
+    const cached = localStorage.getItem('chronoflow_health_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      applyHealthData(parsed, false);
+    }
+  } catch (e) {}
+
   try {
     const res = await fetch('/api/health/today');
     if (res.ok) {
-      const data = await res.json();
-      applyHealthData(data);
+      const serverData = await res.json();
+      
+      let clientCache = null;
+      try {
+        const c = localStorage.getItem('chronoflow_health_cache');
+        if (c) clientCache = JSON.parse(c);
+      } catch (e) {}
+
+      const isServerInitial = serverData.source && serverData.source.includes('Initial');
+      const isClientWatch = clientCache && clientCache.source && clientCache.source.includes('Apple Watch Sync');
+
+      if (isServerInitial && isClientWatch) {
+        // Heal serverless container with client's confirmed watch sync
+        fetch('/api/health/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clientCache)
+        }).catch(() => {});
+        applyHealthData(clientCache, false);
+      } else {
+        applyHealthData(serverData);
+      }
     }
   } catch (err) {
-    console.debug('Local health API unreachable, using default baseline', err);
+    console.debug('Health API unreachable, using cached baseline', err);
   }
 }
 
-function applyHealthData(data) {
+function applyHealthData(data, saveToStorage = true) {
   if (!data) return;
   state.health.sats = data.sats !== undefined ? data.sats : state.health.sats;
   state.health.hrv = data.hrv !== undefined ? Math.round(data.hrv) : state.health.hrv;
   state.health.rhr = data.restingHeartRate !== undefined ? Math.round(data.restingHeartRate) : state.health.rhr;
   state.health.sleepDuration = data.sleepDurationHours !== undefined ? data.sleepDurationHours : state.health.sleepDuration;
   state.health.readiness = (data.readinessScore !== undefined && data.readinessScore !== null && !isNaN(data.readinessScore)) ? data.readinessScore : (state.health.readiness || 88);
-  state.health.source = data.source || "Apple Watch";
-  state.health.lastSynced = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  state.health.source = data.source || "Apple Watch Sync";
+  state.health.lastSynced = data.lastSynced ? new Date(data.lastSynced).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   const incomingWake = data.wakeTime || data.wake || data.wake_time;
   if (incomingWake) {
@@ -503,6 +532,29 @@ function applyHealthData(data) {
       if (data.bedTime) state.sleepTime = data.bedTime;
       ULTRADIAN_SLOTS = generateUltradianSlots(state.wakeTime, state.sleepTime);
     }
+  }
+
+  // Update source badge if present
+  const sourcePill = document.getElementById('healthSourcePill');
+  if (sourcePill) {
+    sourcePill.textContent = state.health.source;
+  }
+
+  if (saveToStorage) {
+    try {
+      localStorage.setItem('chronoflow_health_cache', JSON.stringify({
+        ...data,
+        wakeTime: state.wakeTime,
+        sleepTime: state.sleepTime,
+        sats: state.health.sats,
+        hrv: state.health.hrv,
+        restingHeartRate: state.health.rhr,
+        sleepDurationHours: state.health.sleepDuration,
+        readinessScore: state.health.readiness,
+        source: state.health.source,
+        savedAt: Date.now()
+      }));
+    } catch (e) {}
   }
 
   renderApp();

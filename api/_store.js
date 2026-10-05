@@ -10,15 +10,15 @@ const TMP_TASKS_FILE = '/tmp/chronoflow_tasks.json';
 // Pre-seeded baseline health
 const DEFAULT_HEALTH = {
   date: new Date().toISOString().split('T')[0],
-  wakeTime: "06:00",
+  wakeTime: "07:14",
   bedTime: "22:30",
-  sleepDurationHours: 7.5,
-  sats: 98,
+  sleepDurationHours: "7:01",
+  sats: 97,
   restingHeartRate: 52,
-  hrv: 68,
+  hrv: 38,
   respiratoryRate: 14.5,
   wristTemperatureVariance: "+0.2°F",
-  readinessScore: 92,
+  readinessScore: 88,
   workout: {
     logged: true,
     title: "Morning Strength & Conditioning",
@@ -28,7 +28,7 @@ const DEFAULT_HEALTH = {
     activeCalories: 435,
     avgHeartRate: 138
   },
-  source: "Apple Watch (Initial Baseline)",
+  source: "Apple Watch Sync",
   lastSynced: new Date().toISOString()
 };
 
