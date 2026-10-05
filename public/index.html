@@ -97,6 +97,12 @@
           <span>Auto-Triage Today</span>
         </button>
 
+        <!-- Evening Shutdown & Plan Tomorrow Trigger -->
+        <button id="btnPlanTomorrowHeader" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-700/80 to-purple-700/80 hover:from-indigo-600 hover:to-purple-600 text-white text-xs font-bold border border-indigo-400/40 transition flex items-center gap-1.5 shadow-md shadow-indigo-950/40" title="Open Evening Shutdown & Plan Tomorrow Wizard">
+          <i class="fa-solid fa-moon text-amber-300"></i>
+          <span>Plan Tomorrow</span>
+        </button>
+
         <!-- Chrono Wake / Sleep Calibration Trigger -->
         <button id="btnSleepWakeConfig" class="px-3 py-2 rounded-xl bg-slate-850 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-amber-500/40 transition flex items-center gap-1.5 shadow-sm" title="Adjust Wake and Sleep Times">
           <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
@@ -311,18 +317,34 @@
       <!-- LEFT: Ultradian Cycle Timeline (7 cols) -->
       <section class="lg:col-span-7 space-y-4">
         
-        <div class="flex items-center justify-between pb-1">
+        <div class="flex items-center justify-between pb-1 flex-wrap gap-2.5">
           <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-list-check text-indigo-400"></i>
-              <span>Today's Chrono-Slots</span>
-            </h3>
-            <p id="timelineSubtext" class="text-xs text-slate-300">Sequenced from 10:45 AM launch through 5:30 PM shutdown.</p>
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i id="timelineIcon" class="fa-solid fa-list-check text-indigo-400"></i>
+                <span id="timelineTitleText">Today's Chrono-Slots</span>
+              </h3>
+
+              <!-- Segmented Day Switcher (Today vs. Tomorrow) -->
+              <div class="inline-flex p-1 bg-slate-900 border border-slate-700/80 rounded-xl text-xs font-bold shadow-inner">
+                <button id="btnViewToday" type="button" class="px-3 py-1 rounded-lg bg-brand-600 text-white shadow transition flex items-center gap-1.5" title="View Today's Schedule">
+                  <i class="fa-solid fa-sun text-amber-300 text-[11px]"></i> Today
+                </button>
+                <button id="btnViewTomorrow" type="button" class="px-3 py-1 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5" title="View Tomorrow's Schedule">
+                  <i class="fa-solid fa-moon text-indigo-300 text-[11px]"></i> Tomorrow
+                  <span id="badgeTomorrowCount" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 font-bold">0</span>
+                </button>
+              </div>
+            </div>
+            <p id="timelineSubtext" class="text-xs text-slate-300 mt-1">Sequenced from 10:45 AM launch through 5:30 PM shutdown.</p>
           </div>
 
           <div class="flex items-center gap-2">
+            <button id="btnOpenPlanTomorrowFromTimeline" type="button" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-800/80 hover:to-indigo-800/80 text-purple-200 border border-purple-500/40 transition flex items-center gap-1.5 shadow-sm" title="Open Evening Shutdown & Planning Wizard">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300 text-[11px]"></i> Plan Wizard
+            </button>
             <button id="btnCollapseTroughs" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
-              <i class="fa-solid fa-arrows-up-down text-[11px] mr-1"></i> Toggle Rest Troughs
+              <i class="fa-solid fa-arrows-up-down text-[11px] mr-1"></i> Toggle Troughs
             </button>
           </div>
         </div>
@@ -680,6 +702,13 @@
                 <option value="c4">Cycle 4 (Rebound Intake)</option>
                 <option value="shutdown">Shutdown Ritual</option>
               </optgroup>
+              <optgroup label="Tomorrow Ultradian Cycles">
+                <option value="tomorrow_c1">Tomorrow • Cycle 1 (Golden Peak)</option>
+                <option value="tomorrow_c2">Tomorrow • Cycle 2 (Execution Peak)</option>
+                <option value="tomorrow_c3">Tomorrow • Cycle 3 (Admin Blitz)</option>
+                <option value="tomorrow_c4">Tomorrow • Cycle 4 (Rebound Intake)</option>
+                <option value="tomorrow_shutdown">Tomorrow • Shutdown</option>
+              </optgroup>
               <optgroup id="taskEditDaysGroup" label="Upcoming Days">
                 <option value="d1">Tomorrow</option>
                 <option value="d2">Day After Tomorrow</option>
@@ -716,6 +745,153 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- 6. Evening Shutdown & Plan Tomorrow Wizard Modal -->
+  <div id="modalPlanTomorrow" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel rounded-3xl p-6 lg:p-7 max-w-2xl w-full border border-purple-500/40 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600/40 to-indigo-600/40 border border-purple-500/50 flex items-center justify-center text-purple-300 text-lg shadow-sm">
+            <i class="fa-solid fa-moon text-amber-300"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>Evening Shutdown & Tomorrow's Blueprint</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Next Day Flow</span>
+            </h3>
+            <p class="text-xs text-slate-300 mt-0.5">Calibrate tomorrow's ultradian schedule, rollover open loops, and prime your morning.</p>
+          </div>
+        </div>
+        <button id="btnClosePlanTomorrow" class="text-slate-400 hover:text-white p-2 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Step Navigation Tabs -->
+      <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-700/80 text-xs font-bold">
+        <button type="button" id="tabWizardStep1" class="wizard-tab py-2 rounded-lg text-center transition bg-purple-600 text-white shadow">
+          1. Rollover Open Tasks
+        </button>
+        <button type="button" id="tabWizardStep2" class="wizard-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
+          2. Slot Tomorrow's Peaks
+        </button>
+        <button type="button" id="tabWizardStep3" class="wizard-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white">
+          3. Sleep & Wake Target
+        </button>
+      </div>
+
+      <!-- Step Content Container -->
+      <div class="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+
+        <!-- STEP 1: Rollover Incomplete Tasks -->
+        <div id="wizardStepContent1" class="space-y-3">
+          <div class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-700/80 flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <span class="font-bold text-amber-300 block uppercase tracking-wider text-xs">Review Today's Remaining Loops</span>
+              <p class="text-slate-300 leading-relaxed text-xs mt-0.5" id="wizardTodayRemainingSummary">
+                Review any incomplete tasks from today. Rollover to tomorrow or clear them off active working memory.
+              </p>
+            </div>
+            <button type="button" id="btnRolloverAllToTomorrow" class="px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 text-xs font-bold transition flex items-center gap-1.5">
+              <i class="fa-solid fa-forward-step text-amber-300"></i> Move All to Tomorrow
+            </button>
+          </div>
+
+          <div id="wizardIncompleteTasksList" class="space-y-2">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- STEP 2: Allocate Tomorrow's Peak Slots -->
+        <div id="wizardStepContent2" class="space-y-3 hidden">
+          <div class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-700/80 space-y-1">
+            <span class="font-bold text-purple-300 block uppercase tracking-wider text-xs">Tomorrow's Cognitive Capacity & Peaks</span>
+            <p class="text-slate-300 leading-relaxed text-xs">
+              Align high-load intellectual work with Cycle 1 and Cycle 2. Reserve Cycle 3 for admin, outreach, and logistics.
+            </p>
+          </div>
+
+          <!-- Capacity Badges for Tomorrow's Cycles -->
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-amber-500/30">
+              <span class="text-[10px] uppercase font-bold text-amber-300 block">Cycle 1 (Golden Peak)</span>
+              <span id="wizardCapC1" class="font-mono text-sm font-bold text-white">0 / 90m</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-emerald-500/30">
+              <span class="text-[10px] uppercase font-bold text-emerald-300 block">Cycle 2 (Execution)</span>
+              <span id="wizardCapC2" class="font-mono text-sm font-bold text-white">0 / 80m</span>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-xl border border-cyan-500/30">
+              <span class="text-[10px] uppercase font-bold text-cyan-300 block">Cycle 3 (Admin Blitz)</span>
+              <span id="wizardCapC3" class="font-mono text-sm font-bold text-white">0 / 75m</span>
+            </div>
+          </div>
+
+          <div id="wizardTomorrowAllocatedList" class="space-y-2">
+            <!-- Populated dynamically with tomorrow's scheduled tasks -->
+          </div>
+        </div>
+
+        <!-- STEP 3: Biological Anchors & Wake Target -->
+        <div id="wizardStepContent3" class="space-y-3.5 hidden">
+          <div class="bg-slate-900/90 rounded-xl p-3.5 border border-slate-700/80 space-y-1">
+            <span class="font-bold text-emerald-300 block uppercase tracking-wider text-xs">Tomorrow's Biological Priming</span>
+            <p class="text-slate-300 leading-relaxed text-xs">
+              Confirm your planned bedtime tonight and wake-up target tomorrow so your circadian timeline is pre-calibrated.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Target Bedtime Tonight</label>
+              <input type="time" id="wizardInputBedtime" value="22:30" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-purple-400">
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1.5 font-bold uppercase tracking-wider text-xs">Target Wake Tomorrow</label>
+              <input type="time" id="wizardInputWake" value="07:14" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-purple-400">
+            </div>
+          </div>
+
+          <!-- Schedule Projection Card -->
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-purple-500/30 space-y-2 text-xs">
+            <span class="font-bold text-white block flex items-center gap-1.5">
+              <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+              <span id="wizardProjectionTitle">Tomorrow's Projected Roadmap</span>
+            </span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300" id="wizardProjectionDetails">
+              <div class="p-2 rounded-lg bg-slate-850 border border-slate-750">
+                <strong class="text-emerald-300 block">7:14 AM – 10:45 AM</strong>
+                <span>Morning Foundation: Hydration, Gym workout & Sunlight.</span>
+              </div>
+              <div class="p-2 rounded-lg bg-slate-850 border border-slate-750">
+                <strong class="text-amber-300 block">10:45 AM – 12:15 PM</strong>
+                <span>Cycle 1 (Golden Peak): Uninterrupted Deep Focus.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-slate-700/80 flex items-center justify-between gap-3 flex-wrap">
+        <button type="button" id="btnWizardPrev" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition opacity-50 cursor-not-allowed">
+          Back
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnWizardNext" class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition">
+            Next Step
+          </button>
+          <button type="button" id="btnLockInTomorrow" class="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-md shadow-indigo-950/50">
+            <i class="fa-solid fa-lock text-amber-300"></i>
+            <span>Lock In Tomorrow's Schedule</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

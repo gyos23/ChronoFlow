@@ -405,6 +405,9 @@ const INITIAL_TASKS = [
 let state = {
   wakeTime: '07:14',
   sleepTime: '22:30',
+  viewMode: 'today', // 'today' | 'tomorrow'
+  tomorrowWakeTime: '07:14',
+  tomorrowSleepTime: '22:30',
   tasks: JSON.parse(JSON.stringify(INITIAL_TASKS)),
   activeDayTab: 'day_1',
   showTroughs: true,
@@ -430,6 +433,24 @@ let state = {
 
 // --- INITIALIZATION ---
 window.addEventListener('DOMContentLoaded', () => {
+  // Load saved tomorrow plan if available
+  try {
+    const savedTomorrow = localStorage.getItem('chronoflow_tomorrow_plan');
+    if (savedTomorrow) {
+      const parsed = JSON.parse(savedTomorrow);
+      if (parsed.tomorrowWakeTime) state.tomorrowWakeTime = parsed.tomorrowWakeTime;
+      if (parsed.tomorrowSleepTime) state.tomorrowSleepTime = parsed.tomorrowSleepTime;
+      if (parsed.tasks && Array.isArray(parsed.tasks)) {
+        parsed.tasks.forEach(pt => {
+          const existing = state.tasks.find(t => t.id === pt.id);
+          if (existing) {
+            existing.slot = pt.slot;
+          }
+        });
+      }
+    }
+  } catch (e) {}
+
   setupSSE();
   fetchHealthStats();
   fetchOmniTasks();
@@ -1052,12 +1073,65 @@ function renderDaySelectorTabs() {
   });
 }
 
+function getTomorrowSlots() {
+  const wake = state.tomorrowWakeTime || state.wakeTime || '07:14';
+  const sleep = state.tomorrowSleepTime || state.sleepTime || '22:30';
+  const baseSlots = generateUltradianSlots(wake, sleep);
+  return baseSlots.map(s => ({
+    ...s,
+    id: `tomorrow_${s.id}`,
+    baseId: s.id,
+    title: s.title.replace('Today', 'Tomorrow')
+  }));
+}
+
 function renderTimeline() {
   const container = document.getElementById('timelineContainer');
   if (!container) return;
   container.innerHTML = '';
 
-  ULTRADIAN_SLOTS.forEach(slot => {
+  const isTomorrow = state.viewMode === 'tomorrow';
+  const titleEl = document.getElementById('timelineTitleText');
+  const subtextEl = document.getElementById('timelineSubtext');
+  const iconEl = document.getElementById('timelineIcon');
+  const badgeTomorrowCount = document.getElementById('badgeTomorrowCount');
+
+  // Count tasks assigned to tomorrow
+  const tomorrowTasks = state.tasks.filter(t => (t.slot && t.slot.startsWith('tomorrow_')) || t.slot === 'day_1');
+  if (badgeTomorrowCount) {
+    badgeTomorrowCount.textContent = tomorrowTasks.length;
+  }
+
+  // Update segmented control buttons styling
+  const btnToday = document.getElementById('btnViewToday');
+  const btnTomorrow = document.getElementById('btnViewTomorrow');
+  if (btnToday && btnTomorrow) {
+    if (isTomorrow) {
+      btnToday.className = "px-3 py-1 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5";
+      btnTomorrow.className = "px-3 py-1 rounded-lg bg-purple-600 text-white shadow transition flex items-center gap-1.5";
+    } else {
+      btnToday.className = "px-3 py-1 rounded-lg bg-brand-600 text-white shadow transition flex items-center gap-1.5";
+      btnTomorrow.className = "px-3 py-1 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5";
+    }
+  }
+
+  const upcoming = getUpcomingDays();
+  const tomorrowDayObj = upcoming[0];
+  const tomorrowName = tomorrowDayObj ? tomorrowDayObj.dateDisplay : 'Tomorrow';
+
+  if (isTomorrow) {
+    if (titleEl) titleEl.textContent = `Tomorrow's Chrono-Slots (${tomorrowName})`;
+    if (subtextEl) subtextEl.textContent = `Pre-calibrated for ${minutesToTimeStr(timeStringToMinutes(state.tomorrowWakeTime || '07:14'))} wake • Ready for tomorrow's execution.`;
+    if (iconEl) iconEl.className = "fa-solid fa-moon text-purple-400";
+  } else {
+    if (titleEl) titleEl.textContent = "Today's Chrono-Slots";
+    if (subtextEl) subtextEl.textContent = `Sequenced from ${minutesToTimeStr(timeStringToMinutes(state.wakeTime))} wake through evening shutdown.`;
+    if (iconEl) iconEl.className = "fa-solid fa-list-check text-indigo-400";
+  }
+
+  const activeSlots = isTomorrow ? getTomorrowSlots() : ULTRADIAN_SLOTS;
+
+  activeSlots.forEach(slot => {
     if (!state.showTroughs && slot.type === 'trough') {
       return;
     }
@@ -1078,6 +1152,7 @@ function renderTimeline() {
             <span class="text-xs uppercase tracking-wider font-extrabold text-slate-300">
               ${slot.phaseName}
             </span>
+            ${isTomorrow ? `<span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Tomorrow Plan</span>` : ''}
           </div>
           <h4 class="text-base font-bold text-white mt-1.5 tracking-tight">${slot.title}</h4>
           <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">${slot.description}</p>
@@ -1087,7 +1162,7 @@ function renderTimeline() {
           <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 ${slotMinutesUsed > slot.durationMins ? 'text-rose-400 border-rose-500/50' : 'text-slate-200'}">
             ${slotMinutesUsed} / ${slot.durationMins}m
           </span>
-          ${slot.type === 'deep' ? `
+          ${slot.type === 'deep' && !isTomorrow ? `
             <button onclick="startFocusTimerForSlot('${slot.id}')" class="block mt-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition">
               <i class="fa-solid fa-play text-[10px] mr-1"></i> Start Focus
             </button>
@@ -1098,8 +1173,11 @@ function renderTimeline() {
 
     if (slotTasks.length === 0) {
       html += `
-        <div class="py-4 px-4 rounded-xl bg-slate-900/60 border border-dashed border-slate-700/80 text-center text-xs font-medium text-slate-400">
-          ${slot.type === 'trough' ? 'Protected rest window • Screen-free decompression' : 'Unallocated slot • Ready for intake'}
+        <div class="py-4 px-4 rounded-xl bg-slate-900/60 border border-dashed border-slate-700/80 text-center text-xs font-medium text-slate-400 flex items-center justify-between gap-2">
+          <span>${slot.type === 'trough' ? 'Protected rest window • Screen-free decompression' : 'Unallocated slot • Ready for intake'}</span>
+          <button onclick="promptSlotTask('${slot.id}')" class="text-xs text-brand-300 hover:text-brand-200 font-bold px-2.5 py-1 rounded bg-slate-800 border border-slate-700 transition">
+            <i class="fa-solid fa-plus mr-1"></i> Add Task
+          </button>
         </div>
       `;
     } else {
@@ -1130,9 +1208,15 @@ function renderTimeline() {
               <button onclick="openEditTaskModal('${task.id}')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition text-xs" title="Edit Task">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
-              <button onclick="quickReschedule('${task.id}', 'day_1')" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-900/60 text-slate-300 hover:text-brand-300 transition text-xs" title="Defer to Tomorrow">
-                <i class="fa-solid fa-arrow-right"></i>
-              </button>
+              ${isTomorrow ? `
+                <button onclick="pullBackToToday('${task.id}')" class="p-2 rounded-lg bg-slate-800 hover:bg-emerald-900/60 text-slate-300 hover:text-emerald-300 transition text-xs" title="Pull Back to Today">
+                  <i class="fa-solid fa-arrow-left"></i>
+                </button>
+              ` : `
+                <button onclick="quickReschedule('${task.id}', 'tomorrow_c1')" class="p-2 rounded-lg bg-slate-800 hover:bg-brand-900/60 text-slate-300 hover:text-brand-300 transition text-xs" title="Move to Tomorrow's Flow">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              `}
             </div>
           </div>
         `;
@@ -1651,6 +1735,359 @@ function setupEventListeners() {
 
   const btnDeleteTask = document.getElementById('btnDeleteTask');
   if (btnDeleteTask) btnDeleteTask.addEventListener('click', handleDeleteTask);
+
+  // Day View Switcher (Today vs. Tomorrow)
+  const btnViewToday = document.getElementById('btnViewToday');
+  if (btnViewToday) {
+    btnViewToday.addEventListener('click', () => switchViewMode('today'));
+  }
+  const btnViewTomorrow = document.getElementById('btnViewTomorrow');
+  if (btnViewTomorrow) {
+    btnViewTomorrow.addEventListener('click', () => switchViewMode('tomorrow'));
+  }
+
+  // Plan Tomorrow Wizard Triggers
+  const btnPlanTomorrowHeader = document.getElementById('btnPlanTomorrowHeader');
+  if (btnPlanTomorrowHeader) {
+    btnPlanTomorrowHeader.addEventListener('click', openPlanTomorrowWizard);
+  }
+  const btnOpenPlanFromTimeline = document.getElementById('btnOpenPlanTomorrowFromTimeline');
+  if (btnOpenPlanFromTimeline) {
+    btnOpenPlanFromTimeline.addEventListener('click', openPlanTomorrowWizard);
+  }
+  const btnClosePlanTomorrow = document.getElementById('btnClosePlanTomorrow');
+  if (btnClosePlanTomorrow) {
+    btnClosePlanTomorrow.addEventListener('click', closePlanTomorrowWizard);
+  }
+
+  // Wizard Navigation
+  const btnWizardPrev = document.getElementById('btnWizardPrev');
+  if (btnWizardPrev) {
+    btnWizardPrev.addEventListener('click', () => {
+      if (currentWizardStep > 1) setWizardStep(currentWizardStep - 1);
+    });
+  }
+  const btnWizardNext = document.getElementById('btnWizardNext');
+  if (btnWizardNext) {
+    btnWizardNext.addEventListener('click', () => {
+      if (currentWizardStep < 3) setWizardStep(currentWizardStep + 1);
+    });
+  }
+  const btnLockInTomorrow = document.getElementById('btnLockInTomorrow');
+  if (btnLockInTomorrow) {
+    btnLockInTomorrow.addEventListener('click', lockInTomorrowPlan);
+  }
+  const btnRolloverAll = document.getElementById('btnRolloverAllToTomorrow');
+  if (btnRolloverAll) {
+    btnRolloverAll.addEventListener('click', rolloverAllIncompleteToTomorrow);
+  }
+}
+
+// Plan Tomorrow Wizard State & Logic
+let currentWizardStep = 1;
+
+function openPlanTomorrowWizard() {
+  currentWizardStep = 1;
+  const modal = document.getElementById('modalPlanTomorrow');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  renderWizardStep(1);
+}
+
+function closePlanTomorrowWizard() {
+  const modal = document.getElementById('modalPlanTomorrow');
+  if (modal) modal.classList.add('hidden');
+}
+
+function setWizardStep(stepNum) {
+  currentWizardStep = stepNum;
+  renderWizardStep(stepNum);
+}
+
+function renderWizardStep(stepNum) {
+  for (let i = 1; i <= 3; i++) {
+    const tab = document.getElementById(`tabWizardStep${i}`);
+    const content = document.getElementById(`wizardStepContent${i}`);
+    if (tab && content) {
+      if (i === stepNum) {
+        tab.className = "wizard-tab py-2 rounded-lg text-center transition bg-purple-600 text-white shadow font-bold";
+        content.classList.remove('hidden');
+      } else {
+        tab.className = "wizard-tab py-2 rounded-lg text-center transition text-slate-300 hover:text-white font-bold";
+        content.classList.add('hidden');
+      }
+    }
+  }
+
+  const btnPrev = document.getElementById('btnWizardPrev');
+  const btnNext = document.getElementById('btnWizardNext');
+  if (btnPrev) {
+    if (stepNum === 1) {
+      btnPrev.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      btnPrev.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  }
+  if (btnNext) {
+    if (stepNum === 3) {
+      btnNext.classList.add('hidden');
+    } else {
+      btnNext.classList.remove('hidden');
+      btnNext.textContent = stepNum === 1 ? 'Next: Tomorrow Slots' : 'Next: Wake Target';
+    }
+  }
+
+  if (stepNum === 1) renderWizardStep1();
+  if (stepNum === 2) renderWizardStep2();
+  if (stepNum === 3) renderWizardStep3();
+}
+
+function renderWizardStep1() {
+  const listEl = document.getElementById('wizardIncompleteTasksList');
+  const summaryEl = document.getElementById('wizardTodayRemainingSummary');
+  if (!listEl) return;
+
+  const todayIncomplete = state.tasks.filter(t => 
+    ['c1', 'c2', 'c3', 'c4', 'shutdown', 'foundation'].includes(t.slot) && t.status !== 'completed'
+  );
+
+  if (summaryEl) {
+    summaryEl.textContent = todayIncomplete.length > 0
+      ? `Found ${todayIncomplete.length} unfinished task${todayIncomplete.length > 1 ? 's' : ''} in today's slots. Rollover to tomorrow or clear to avoid cognitive residue.`
+      : "All of today's tasks are complete or already rolled over! You have a clean slate.";
+  }
+
+  if (todayIncomplete.length === 0) {
+    listEl.innerHTML = `
+      <div class="py-6 px-4 rounded-xl bg-slate-900 border border-slate-700/80 text-center text-xs text-slate-300 space-y-1">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg mb-1 block"></i>
+        <strong class="text-white block text-sm">Today is 100% Cleared</strong>
+        <span>No open tasks remaining in today's slots. Click "Next Step" to allocate tomorrow's priorities.</span>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  todayIncomplete.forEach(task => {
+    html += `
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-3 flex items-center justify-between gap-3 flex-wrap">
+        <div class="space-y-1 flex-1 min-w-[200px]">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-white font-semibold text-xs">${task.title}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-amber-300 border border-amber-500/30">${task.duration}m</span>
+            <span class="text-[10px] text-slate-400 font-medium">${task.project}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" onclick="moveTaskToTomorrowSlot('${task.id}', 'tomorrow_c1')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition" title="Move to Tomorrow Cycle 1">
+            → Cycle 1
+          </button>
+          <button type="button" onclick="moveTaskToTomorrowSlot('${task.id}', 'tomorrow_c2')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold transition" title="Move to Tomorrow Cycle 2">
+            → Cycle 2
+          </button>
+          <button type="button" onclick="moveTaskToTomorrowSlot('${task.id}', 'tomorrow_c3')" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition" title="Move to Tomorrow Cycle 3">
+            → Cycle 3
+          </button>
+          <button type="button" onclick="quickReschedule('${task.id}', 'unscheduled'); renderWizardStep1();" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition" title="Stash into Backlog">
+            Backlog
+          </button>
+          <button type="button" onclick="markTaskDone('${task.id}'); renderWizardStep1();" class="px-2.5 py-1 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 text-[11px] font-bold transition" title="Mark Done">
+            ✓ Done
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+}
+
+function renderWizardStep2() {
+  const listEl = document.getElementById('wizardTomorrowAllocatedList');
+  const capC1 = document.getElementById('wizardCapC1');
+  const capC2 = document.getElementById('wizardCapC2');
+  const capC3 = document.getElementById('wizardCapC3');
+
+  const tomorrowTasks = state.tasks.filter(t => 
+    (t.slot && t.slot.startsWith('tomorrow_')) || t.slot === 'day_1'
+  );
+
+  const minsC1 = state.tasks.filter(t => t.slot === 'tomorrow_c1').reduce((sum, t) => sum + t.duration, 0);
+  const minsC2 = state.tasks.filter(t => t.slot === 'tomorrow_c2').reduce((sum, t) => sum + t.duration, 0);
+  const minsC3 = state.tasks.filter(t => t.slot === 'tomorrow_c3').reduce((sum, t) => sum + t.duration, 0);
+
+  if (capC1) {
+    capC1.textContent = `${minsC1} / 90m`;
+    capC1.className = `font-mono text-sm font-bold ${minsC1 > 90 ? 'text-rose-400' : 'text-amber-300'}`;
+  }
+  if (capC2) {
+    capC2.textContent = `${minsC2} / 80m`;
+    capC2.className = `font-mono text-sm font-bold ${minsC2 > 80 ? 'text-rose-400' : 'text-emerald-300'}`;
+  }
+  if (capC3) {
+    capC3.textContent = `${minsC3} / 75m`;
+    capC3.className = `font-mono text-sm font-bold ${minsC3 > 75 ? 'text-rose-400' : 'text-cyan-300'}`;
+  }
+
+  if (!listEl) return;
+
+  if (tomorrowTasks.length === 0) {
+    listEl.innerHTML = `
+      <div class="py-6 px-4 rounded-xl bg-slate-900 border border-slate-700/80 text-center text-xs text-slate-300 space-y-2">
+        <i class="fa-solid fa-inbox text-purple-400 text-lg mb-1 block"></i>
+        <strong class="text-white block text-sm">No Tasks Slotted for Tomorrow Yet</strong>
+        <span>Tasks from Weekly Staging or Backlog will appear here once allocated.</span>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  tomorrowTasks.forEach(task => {
+    html += `
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-3 flex items-center justify-between gap-3 flex-wrap">
+        <div class="space-y-1 flex-1 min-w-[200px]">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-white font-semibold text-xs">${task.title}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-amber-300 border border-amber-500/30">${task.duration}m</span>
+            <span class="text-[10px] text-slate-400 font-medium">${task.project}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <select onchange="moveTaskToTomorrowSlot('${task.id}', this.value); renderWizardStep2();" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1 focus:outline-none focus:border-purple-400">
+            <option value="tomorrow_c1" ${task.slot === 'tomorrow_c1' ? 'selected' : ''}>Cycle 1 (Golden Peak)</option>
+            <option value="tomorrow_c2" ${task.slot === 'tomorrow_c2' ? 'selected' : ''}>Cycle 2 (Execution)</option>
+            <option value="tomorrow_c3" ${task.slot === 'tomorrow_c3' ? 'selected' : ''}>Cycle 3 (Admin Blitz)</option>
+            <option value="tomorrow_c4" ${task.slot === 'tomorrow_c4' ? 'selected' : ''}>Cycle 4 (Rebound)</option>
+            <option value="day_1" ${task.slot === 'day_1' ? 'selected' : ''}>Staging Buffer</option>
+            <option value="unscheduled">Move to Backlog</option>
+          </select>
+        </div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+}
+
+function renderWizardStep3() {
+  const wakeInput = document.getElementById('wizardInputWake');
+  const bedtimeInput = document.getElementById('wizardInputBedtime');
+  if (wakeInput && !wakeInput.value) wakeInput.value = state.tomorrowWakeTime || state.wakeTime || '07:14';
+  if (bedtimeInput && !bedtimeInput.value) bedtimeInput.value = state.tomorrowSleepTime || state.sleepTime || '22:30';
+
+  updateWizardProjection();
+
+  wakeInput?.addEventListener('input', updateWizardProjection);
+  bedtimeInput?.addEventListener('input', updateWizardProjection);
+}
+
+function updateWizardProjection() {
+  const wakeVal = document.getElementById('wizardInputWake')?.value || '07:14';
+  const bedtimeVal = document.getElementById('wizardInputBedtime')?.value || '22:30';
+  const detailsEl = document.getElementById('wizardProjectionDetails');
+
+  const wakeM = timeStringToMinutes(wakeVal);
+  const foundationEnd = wakeM + 210;
+  const c1Start = foundationEnd;
+  const c1End = c1Start + 90;
+
+  if (detailsEl) {
+    detailsEl.innerHTML = `
+      <div class="p-2.5 rounded-lg bg-slate-850 border border-slate-750 space-y-0.5">
+        <strong class="text-emerald-300 block text-xs font-mono">${minutesToTimeStr(wakeM)} – ${minutesToTimeStr(foundationEnd)}</strong>
+        <span class="text-[11px] text-slate-300">Morning Foundation: Sunlight, Hydration & Gym Workout.</span>
+      </div>
+      <div class="p-2.5 rounded-lg bg-slate-850 border border-slate-750 space-y-0.5">
+        <strong class="text-amber-300 block text-xs font-mono">${minutesToTimeStr(c1Start)} – ${minutesToTimeStr(c1End)}</strong>
+        <span class="text-[11px] text-slate-300">Cycle 1 (Golden Peak): High-Leverage Deep Focus Sprint.</span>
+      </div>
+    `;
+  }
+}
+
+function moveTaskToTomorrowSlot(taskId, slotId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (task) {
+    task.slot = slotId;
+    playChime("C5", "16n");
+    renderApp();
+    renderWizardStep1();
+    renderWizardStep2();
+    showToast(`Assigned "${task.title.slice(0, 22)}..." to Tomorrow.`);
+  }
+}
+
+function markTaskDone(taskId) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (task) {
+    task.status = 'completed';
+    playChime("G5", "16n");
+    renderApp();
+    showToast(`✓ Marked "${task.title.slice(0, 22)}..." complete!`);
+  }
+}
+
+function rolloverAllIncompleteToTomorrow() {
+  const todayIncomplete = state.tasks.filter(t => 
+    ['c1', 'c2', 'c3', 'c4', 'shutdown', 'foundation'].includes(t.slot) && t.status !== 'completed'
+  );
+  
+  if (todayIncomplete.length === 0) {
+    showToast("No open tasks to rollover!");
+    return;
+  }
+
+  todayIncomplete.forEach((task, idx) => {
+    if (task.type === 'deep') {
+      task.slot = idx % 2 === 0 ? 'tomorrow_c1' : 'tomorrow_c2';
+    } else {
+      task.slot = 'tomorrow_c3';
+    }
+  });
+
+  playChime("E5", "8n");
+  renderApp();
+  renderWizardStep1();
+  renderWizardStep2();
+  showToast(`Rolled over ${todayIncomplete.length} tasks to Tomorrow's slots!`);
+}
+
+function switchViewMode(mode) {
+  state.viewMode = mode;
+  playChime(mode === 'tomorrow' ? "A4" : "C5", "16n");
+  renderApp();
+  showToast(mode === 'tomorrow' ? "Viewing Tomorrow's Chrono-Slots" : "Viewing Today's Chrono-Slots");
+}
+
+function promptSlotTask(slotId) {
+  openNewTaskModal();
+  const select = document.getElementById('taskEditTarget');
+  if (select) select.value = slotId;
+}
+
+function lockInTomorrowPlan() {
+  const wakeVal = document.getElementById('wizardInputWake')?.value || '07:14';
+  const bedtimeVal = document.getElementById('wizardInputBedtime')?.value || '22:30';
+
+  state.tomorrowWakeTime = wakeVal;
+  state.tomorrowSleepTime = bedtimeVal;
+  state.viewMode = 'tomorrow';
+
+  try {
+    localStorage.setItem('chronoflow_tomorrow_plan', JSON.stringify({
+      tomorrowWakeTime: state.tomorrowWakeTime,
+      tomorrowSleepTime: state.tomorrowSleepTime,
+      tasks: state.tasks.filter(t => (t.slot && t.slot.startsWith('tomorrow_')) || t.slot === 'day_1'),
+      savedAt: Date.now()
+    }));
+  } catch (e) {}
+
+  closePlanTomorrowWizard();
+  playChime("E5", "8n");
+  renderApp();
+  showToast(`🌙 Tomorrow's blueprint locked in! Viewing Tomorrow's Chrono-Slots.`);
 }
 
 // Modal open/close helpers
