@@ -1,14 +1,14 @@
 {
-  "date": "2026-09-30",
-  "wakeTime": "06:00",
+  "date": "2026-10-05",
+  "wakeTime": "07:14",
   "bedTime": "22:30",
-  "sleepDurationHours": 7.5,
-  "sats": 98,
+  "sleepDurationHours": "7:01",
+  "sats": 97,
   "restingHeartRate": 52,
-  "hrv": 68,
+  "hrv": 38,
   "respiratoryRate": 14.5,
   "wristTemperatureVariance": "+0.2°F",
-  "readinessScore": 92,
+  "readinessScore": 88,
   "workout": {
     "logged": true,
     "title": "Morning Strength & Conditioning",
@@ -18,6 +18,6 @@
     "activeCalories": 435,
     "avgHeartRate": 138
   },
-  "source": "Apple Watch (Simulated / Initial)",
-  "lastSynced": "2026-09-30T11:14:26.889Z"
+  "source": "Apple Watch Sync",
+  "lastSynced": "2026-10-05T19:05:00.000Z"
 }
