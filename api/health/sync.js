@@ -58,6 +58,21 @@ module.exports = async (req, res) => {
     const cleanWake = normalizeTime(rawWake) || existing.wakeTime;
     const cleanBed = normalizeTime(rawBed) || existing.bedTime;
 
+    // Parse sleep duration into a numeric hours value
+    let numSleepHours = existing.sleepDurationHours || 7.5;
+    const rawSleep = body.sleepDurationHours ?? body.sleepDuration ?? body.sleep;
+    if (rawSleep !== undefined && rawSleep !== null) {
+      if (typeof rawSleep === 'string' && rawSleep.includes(':')) {
+        const parts = rawSleep.split(':');
+        numSleepHours = parseFloat(parts[0]) + (parseFloat(parts[1] || 0) / 60);
+      } else {
+        const parsed = parseFloat(rawSleep);
+        if (!isNaN(parsed)) numSleepHours = parsed;
+      }
+    }
+
+    const cleanHrv = body.hrv !== undefined ? Math.round(Number(body.hrv)) : existing.hrv;
+
     const updated = {
       ...existing,
       ...body,
@@ -65,17 +80,21 @@ module.exports = async (req, res) => {
       sats: rawSats !== undefined ? rawSats : existing.sats,
       wakeTime: cleanWake,
       bedTime: cleanBed,
-      restingHeartRate: (body.restingHeartRate ?? body.rhr) !== undefined ? Number(body.restingHeartRate ?? body.rhr) : existing.restingHeartRate,
-      hrv: body.hrv !== undefined ? Number(body.hrv) : existing.hrv,
+      sleepDurationHours: rawSleep !== undefined ? rawSleep : existing.sleepDurationHours,
+      restingHeartRate: (body.restingHeartRate ?? body.rhr) !== undefined ? Math.round(Number(body.restingHeartRate ?? body.rhr)) : existing.restingHeartRate,
+      hrv: cleanHrv,
       source: body.source || "Apple Watch Sync",
       lastSynced: new Date().toISOString()
     };
 
-    // Recompute readiness score
-    const hrvScore = Math.min(100, Math.max(40, (updated.hrv / 70) * 80));
-    const satsScore = updated.sats >= 97 ? 100 : (updated.sats >= 95 ? 85 : 70);
-    const sleepScore = Math.min(100, (updated.sleepDurationHours / 8) * 100);
-    updated.readinessScore = Math.round((hrvScore * 0.4) + (satsScore * 0.3) + (sleepScore * 0.3));
+    // Recompute readiness score cleanly
+    const hrvVal = typeof updated.hrv === 'number' && !isNaN(updated.hrv) ? updated.hrv : 60;
+    const satsVal = typeof updated.sats === 'number' && !isNaN(updated.sats) ? updated.sats : 98;
+    const hrvScore = Math.min(100, Math.max(40, (hrvVal / 70) * 80));
+    const satsScore = satsVal >= 97 ? 100 : (satsVal >= 95 ? 85 : 70);
+    const sleepScore = Math.min(100, (numSleepHours / 8) * 100);
+    const calculatedReadiness = Math.round((hrvScore * 0.4) + (satsScore * 0.3) + (sleepScore * 0.3));
+    updated.readinessScore = !isNaN(calculatedReadiness) ? calculatedReadiness : 88;
 
     await saveHealth(updated);
 

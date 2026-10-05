@@ -472,10 +472,10 @@ async function fetchHealthStats() {
 function applyHealthData(data) {
   if (!data) return;
   state.health.sats = data.sats !== undefined ? data.sats : state.health.sats;
-  state.health.hrv = data.hrv !== undefined ? data.hrv : state.health.hrv;
-  state.health.rhr = data.restingHeartRate !== undefined ? data.restingHeartRate : state.health.rhr;
+  state.health.hrv = data.hrv !== undefined ? Math.round(data.hrv) : state.health.hrv;
+  state.health.rhr = data.restingHeartRate !== undefined ? Math.round(data.restingHeartRate) : state.health.rhr;
   state.health.sleepDuration = data.sleepDurationHours !== undefined ? data.sleepDurationHours : state.health.sleepDuration;
-  state.health.readiness = data.readinessScore !== undefined ? data.readinessScore : state.health.readiness;
+  state.health.readiness = (data.readinessScore !== undefined && data.readinessScore !== null && !isNaN(data.readinessScore)) ? data.readinessScore : (state.health.readiness || 88);
   state.health.source = data.source || "Apple Watch";
   state.health.lastSynced = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
