@@ -1,6 +1,33 @@
 # ChronoFlow — Ultradian Energy & Task Triage Studio
 
-> Synchronize your highest-leverage deep work with your biology. Integrates **OmniFocus 4** and **Apple Health / Apple Watch** to automatically pull your daily vitals, sleep, wake time, and oxygen saturation ("sats"), aligning your tasks into 90-minute ultradian focus peaks.
+> **"Synchronize your highest-leverage deep work with your biology."**  
+> An executive daily operating system integrating **OmniFocus 4** and **Apple Health / Apple Watch** to protect your cognitive bandwidth, auto-calibrate your daily schedule around your real sleep and wake vitals, and align deep work into focused 90-minute ultradian peaks.
+
+---
+
+## 🧭 Core Philosophy: Cognitive Bandwidth Protection
+
+ChronoFlow is built on a single non-negotiable standard: **Cognitive Bandwidth Protection**.
+
+Traditional task managers and calendar tools act as passive, bottomless dumping grounds. They present an overwhelming wall of 50–100 tasks, forcing your prefrontal cortex into continuous micro-decision fatigue, open-loop anxiety, and context-switching before your day even begins. 
+
+ChronoFlow flips this model entirely:
+
+### 1. The Gated Working Memory Doctrine
+* **Never Dump the Entire Backlog onto Today**: If OmniFocus contains 65 active tasks, your conscious working memory should only ever hold **3 to 4 high-leverage execution blocks** at any given moment.
+* **Intelligent Buffer Staging**: Non-essential tasks are safely insulated in the **Weekly Staging & Backlog Deck** (`[Inbox]`, rolling day buffers), eliminating subconscious guilt and preserving executive attention.
+
+### 2. Biological Synchrony Over Arbitrary Clocks
+* **Rhythm Over Rigidity**: Time management fails when it fights human biology. 
+* **The 90-Minute Basic Rest-Activity Cycle (BRAC)**: High-conviction deep work is sequenced into 90-minute Golden Peaks, followed by mandatory 20-minute restorative troughs (screen-free decompression, hydration, NSDR).
+* **Vitals-Anchored Calibration**: Apple Watch biometrics (real wake time, SpO₂ sats, HRV, sleep duration) automatically calibrate your entire schedule every morning. If you wake up at 7:14 AM, your peak kicks off at 10:45 AM, protecting your 90-minute adenosine clearance window and workout priming.
+
+### 3. Evening Shutdown & Tomorrow's Blueprint
+* **Zero Cognitive Residue at Bedtime**: The Evening Planning Wizard rolls over, reschedules, or concludes today's open loops before you sleep.
+* **Wake Up Primed**: When you wake up, tomorrow's schedule is already locked into place. You start your morning foundation with zero friction, zero panic, and total clarity.
+
+### 4. Autonomous Background Relays
+* **No Manual Journaling**: OmniFocus 4 tasks sync silently in the background from your Mac daemon; Apple Watch vitals push automatically from your iPhone Shortcuts. The tools serve the human, never the other way around.
 
 ---
 
@@ -18,6 +45,9 @@
   - Reads active forecast, inbox, and tagged tasks directly from OmniFocus via native JXA / AppleScript (`osascript`).
   - **1-Click Live Triage**: Pushes deferred tasks (to Thursday, Friday, Saturday, etc.) and time caps straight back into OmniFocus without manual copy-pasting.
   - Full fallback copy modal for review.
+- **🌙 Evening Shutdown & "Plan Tomorrow" Blueprinting**:
+  - Segmented **`[ Today ]` | `[ Tomorrow ]`** timeline view switcher allows reviewing and staging tomorrow's cycles anytime.
+  - Guided **Evening Planning Wizard**: Rollovers unfinished loops, manages minute budgets across Cycles 1, 2, and 3, and pre-locks tomorrow's wake target.
 - **🎨 Glassmorphic Interface & Tone.js Timer**:
   - Interactive Circadian Alertness & Ultradian Wave canvas with live time-markers.
   - Focus Timer for 90-minute execution blocks and 20-minute restorative decompression with soothing synthesized chimes.
