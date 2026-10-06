@@ -848,6 +848,7 @@ function renderApp() {
   renderOmniModal();
   drawUltradianWave();
   updatePhaseBadge();
+  updateIntakeBadge();
 }
 
 function renderHealthTelemetry() {
@@ -1781,6 +1782,50 @@ function setupEventListeners() {
   if (btnRolloverAll) {
     btnRolloverAll.addEventListener('click', rolloverAllIncompleteToTomorrow);
   }
+
+  // Today's Master Intake & Chrono Advisory Modal Triggers
+  const btnTodayIntake = document.getElementById('btnTodayIntake');
+  if (btnTodayIntake) {
+    btnTodayIntake.addEventListener('click', openTodayIntakeModal);
+  }
+  const btnOpenTodayIntakeFromTimeline = document.getElementById('btnOpenTodayIntakeFromTimeline');
+  if (btnOpenTodayIntakeFromTimeline) {
+    btnOpenTodayIntakeFromTimeline.addEventListener('click', openTodayIntakeModal);
+  }
+  const btnCloseTodayIntake = document.getElementById('btnCloseTodayIntake');
+  if (btnCloseTodayIntake) {
+    btnCloseTodayIntake.addEventListener('click', closeTodayIntakeModal);
+  }
+  const btnCloseTodayIntakeBottom = document.getElementById('btnCloseTodayIntakeBottom');
+  if (btnCloseTodayIntakeBottom) {
+    btnCloseTodayIntakeBottom.addEventListener('click', closeTodayIntakeModal);
+  }
+  const modalTodayIntake = document.getElementById('modalTodayIntake');
+  if (modalTodayIntake) {
+    modalTodayIntake.addEventListener('click', (e) => {
+      if (e.target === modalTodayIntake) closeTodayIntakeModal();
+    });
+  }
+  const btnAcceptAllRecs = document.getElementById('btnAcceptAllRecs');
+  if (btnAcceptAllRecs) {
+    btnAcceptAllRecs.addEventListener('click', acceptAllRecommendations);
+  }
+  const btnDeferOverflow = document.getElementById('btnDeferOverflowToTomorrow');
+  if (btnDeferOverflow) {
+    btnDeferOverflow.addEventListener('click', deferOverflowToTomorrow);
+  }
+  const filterBtnAll = document.getElementById('filterBtnAll');
+  if (filterBtnAll) {
+    filterBtnAll.addEventListener('click', () => filterIntakeList('all'));
+  }
+  const filterBtnToday = document.getElementById('filterBtnToday');
+  if (filterBtnToday) {
+    filterBtnToday.addEventListener('click', () => filterIntakeList('today'));
+  }
+  const filterBtnDefer = document.getElementById('filterBtnDefer');
+  if (filterBtnDefer) {
+    filterBtnDefer.addEventListener('click', () => filterIntakeList('defer'));
+  }
 }
 
 // Plan Tomorrow Wizard State & Logic
@@ -2333,3 +2378,370 @@ function showToast(msg) {
     toast.classList.add('opacity-0', 'translate-y-20', 'pointer-events-none');
   }, 3200);
 }
+
+// --- TODAY'S MASTER INTAKE & CHRONO ADVISORY ENGINE ---
+let currentIntakeFilter = 'all';
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function computeTodayIntakeUniverse() {
+  if (!state.tasks || !Array.isArray(state.tasks)) return [];
+  const todayCycleSlots = ['foundation', 'c1', 'c2', 'c3', 'c4', 'shutdown'];
+  const map = new Map();
+  state.tasks.forEach(t => {
+    // Universe includes all tasks that are due today, planned today, or assigned to today's cycles/staging
+    if (t.isDueToday || t.isPlannedToday || todayCycleSlots.includes(t.slot)) {
+      map.set(t.id, t);
+    }
+  });
+  return Array.from(map.values());
+}
+
+function updateIntakeBadge() {
+  const universe = computeTodayIntakeUniverse();
+  const count = universe.length;
+  const badge = document.getElementById('badgeTodayIntakeCount');
+  if (badge) badge.textContent = count;
+  const headerBadge = document.getElementById('intakeModalHeaderBadge');
+  if (headerBadge) headerBadge.textContent = `${count} Tasks Due / Planned`;
+}
+
+function getIntakeUniverseWithRecommendations() {
+  const universe = computeTodayIntakeUniverse();
+
+  const slotMinutes = { c1: 0, c2: 0, c3: 0, c4: 0, shutdown: 0 };
+  const slotLimits = { c1: 90, c2: 80, c3: 75, c4: 70, shutdown: 30 };
+
+  const preferredMap = {
+    'g1j3ilOSnv8': { slot: 'c1', phase: 'Cycle 1: Golden Peak', rationale: 'Premier morning alertness window for foundational study.' },
+    'pqFa4eeU2Y6': { slot: 'c1', phase: 'Cycle 1: Golden Peak', rationale: 'High-cognitive-demand portfolio creative work scheduled during maximum focus.' },
+    'jhkjtpBlgb_': { slot: 'c2', phase: 'Cycle 2: Execution Peak', rationale: 'High-velocity job applications sprint timed for peak execution alertness.' },
+    'nJLEA5wxNBA': { slot: 'c3', phase: 'Cycle 3: Admin Blitz', rationale: 'Post-nadir communication & photo upload sprint.' },
+    'a8cCGWbr44W': { slot: 'c3', phase: 'Cycle 3: Admin Blitz', rationale: 'Medical clearance & admin coordination in afternoon blitz.' },
+    'mrnHJC6Vtoa': { slot: 'c3', phase: 'Cycle 3: Admin Blitz', rationale: 'Nidhca financial admin form in dedicated low-cognitive-friction window.' },
+    'm5Sur6ZgUjs': { slot: 'c4', phase: 'Cycle 4: Rebound Intake', rationale: 'Learning techniques review timed during late-day circadian rebound.' },
+    'n52EFrMy8S2': { slot: 'c4', phase: 'Cycle 4: Rebound Intake', rationale: 'Reflective post-mortem synthesis in late afternoon review window.' },
+    'i4FgSBIPm3m': { slot: 'shutdown', phase: 'Workday Shutdown Ritual', rationale: 'Final time-boxing ritual to close open loops before evening rest.' },
+    'aaAhMNh8HpY': { slot: 'day_1', phase: 'Tomorrow (Day 1)', rationale: 'Video scripting & shot list exceeds today\'s deep work budget; staged for tomorrow.', isOverflow: true },
+    'gSJe1tSsKCY': { slot: 'day_1', phase: 'Tomorrow (Day 1)', rationale: 'Event post synthesis staged for tomorrow morning to defend focus today.', isOverflow: true },
+    'ieb6qJDeADF': { slot: 'day_1', phase: 'Tomorrow (Day 1)', rationale: 'Newsletter creation deferred to tomorrow to protect evening recovery.', isOverflow: true },
+    'celrrIQIQlu': { slot: 'day_2', phase: 'In 2 Days (Day 2)', rationale: 'Exploratory video research staged into Day 2 capacity headroom.', isOverflow: true }
+  };
+
+  return universe.map(task => {
+    let rec = null;
+    if (preferredMap[task.id]) {
+      const p = preferredMap[task.id];
+      rec = {
+        recommendedSlot: p.slot,
+        label: p.phase,
+        rationale: p.rationale,
+        isOverflow: !!p.isOverflow
+      };
+      if (slotMinutes[p.slot] !== undefined) {
+        slotMinutes[p.slot] += (task.duration || 30);
+      }
+    } else {
+      const dur = task.duration || 30;
+      const isShutdown = task.type === 'habit' && (dur <= 20 || /time box|shutdown|ritual/i.test(task.title));
+      const isDeep = task.type === 'deep' || dur >= 50 || (task.tags && task.tags.some(t => /top|p1|deep|high/i.test(t)));
+      const isHabit = task.type === 'habit' || (task.tags && task.tags.some(t => /habit|routine|daily/i.test(t)));
+
+      if (isShutdown) {
+        rec = {
+          recommendedSlot: 'shutdown',
+          label: 'Workday Shutdown Ritual',
+          rationale: 'Daily closure routine to disconnect and preserve evening recovery.',
+          isOverflow: false
+        };
+        slotMinutes.shutdown += dur;
+      } else if (isDeep) {
+        if (slotMinutes.c1 + dur <= slotLimits.c1 + 15) {
+          rec = {
+            recommendedSlot: 'c1',
+            label: 'Cycle 1: Golden Peak',
+            rationale: 'High cognitive demand task matched to premier midday alertness.',
+            isOverflow: false
+          };
+          slotMinutes.c1 += dur;
+        } else if (slotMinutes.c2 + dur <= slotLimits.c2 + 15) {
+          rec = {
+            recommendedSlot: 'c2',
+            label: 'Cycle 2: Execution Peak',
+            rationale: 'Deep work sprint assigned to secondary execution peak.',
+            isOverflow: false
+          };
+          slotMinutes.c2 += dur;
+        } else {
+          rec = {
+            recommendedSlot: 'day_1',
+            label: '⏸ Defer to Tomorrow',
+            rationale: 'Exceeds today\'s 4h 15m deep work capacity. Defer to protect circadian rhythm.',
+            isOverflow: true
+          };
+        }
+      } else if (isHabit) {
+        if (slotMinutes.c4 + dur <= slotLimits.c4 + 15) {
+          rec = {
+            recommendedSlot: 'c4',
+            label: 'Cycle 4: Rebound Intake',
+            rationale: 'Light synthesis and habit consolidation in circadian rebound.',
+            isOverflow: false
+          };
+          slotMinutes.c4 += dur;
+        } else {
+          rec = {
+            recommendedSlot: 'day_1',
+            label: '⏸ Defer to Tomorrow',
+            rationale: 'Habit intake window full for today. Deferred to preserve recovery.',
+            isOverflow: true
+          };
+        }
+      } else {
+        if (slotMinutes.c3 + dur <= slotLimits.c3 + 15) {
+          rec = {
+            recommendedSlot: 'c3',
+            label: 'Cycle 3: Admin Blitz',
+            rationale: 'Post-nadir administrative coordination and quick outreach.',
+            isOverflow: false
+          };
+          slotMinutes.c3 += dur;
+        } else if (slotMinutes.c4 + dur <= slotLimits.c4 + 15) {
+          rec = {
+            recommendedSlot: 'c4',
+            label: 'Cycle 4: Rebound Intake',
+            rationale: 'Low cognitive friction tasks slotted in late-day window.',
+            isOverflow: false
+          };
+          slotMinutes.c4 += dur;
+        } else {
+          rec = {
+            recommendedSlot: 'day_1',
+            label: '⏸ Defer to Tomorrow',
+            rationale: 'Daily administrative bandwidth exceeded. Staging for tomorrow.',
+            isOverflow: true
+          };
+        }
+      }
+    }
+    return { task, rec };
+  });
+}
+
+function openTodayIntakeModal() {
+  const modal = document.getElementById('modalTodayIntake');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  renderIntakeDiagnostic();
+  renderIntakeTasks(currentIntakeFilter);
+}
+
+function closeTodayIntakeModal() {
+  const modal = document.getElementById('modalTodayIntake');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderIntakeDiagnostic() {
+  const items = getIntakeUniverseWithRecommendations();
+  const totalDemandMins = items.reduce((sum, item) => sum + (item.task.duration || 30), 0);
+  const totalTasks = items.length;
+
+  const todayItems = items.filter(i => !i.rec.isOverflow);
+  const deferItems = items.filter(i => i.rec.isOverflow);
+  const slottedMins = todayItems.reduce((sum, i) => sum + (i.task.duration || 30), 0);
+
+  const bioCapMins = 255; // 4h 15m core focus
+
+  const demandEl = document.getElementById('intakeTotalDemand');
+  if (demandEl) {
+    const dh = Math.floor(totalDemandMins / 60);
+    const dm = totalDemandMins % 60;
+    demandEl.textContent = `${totalTasks} Tasks • ${dh}h ${dm > 0 ? dm + 'm' : ''}`;
+  }
+
+  const statusEl = document.getElementById('intakeCapacityStatus');
+  if (statusEl) {
+    if (totalDemandMins > bioCapMins) {
+      const overM = totalDemandMins - bioCapMins;
+      const oh = Math.floor(overM / 60);
+      const om = overM % 60;
+      statusEl.textContent = `+${oh > 0 ? oh + 'h ' : ''}${om}m Overload`;
+      statusEl.className = 'font-mono text-sm font-bold text-amber-300';
+    } else {
+      statusEl.textContent = 'Balanced Capacity';
+      statusEl.className = 'font-mono text-sm font-bold text-emerald-300';
+    }
+  }
+
+  // Progress Bar
+  const barSlotted = document.getElementById('intakeBarSlotted');
+  const barOverflow = document.getElementById('intakeBarOverflow');
+  if (barSlotted && barOverflow) {
+    const slottedPct = totalDemandMins > 0 ? Math.round((slottedMins / totalDemandMins) * 100) : 60;
+    const overflowPct = 100 - slottedPct;
+    barSlotted.style.width = `${slottedPct}%`;
+    barSlotted.setAttribute('title', `Slotted Today: ${slottedMins}m (${slottedPct}%)`);
+    barOverflow.style.width = `${overflowPct}%`;
+    barOverflow.setAttribute('title', `Recommended Deferrals: ${totalDemandMins - slottedMins}m (${overflowPct}%)`);
+  }
+
+  // Filter Counts
+  const countAll = document.getElementById('intakeFilterCountAll');
+  if (countAll) countAll.textContent = totalTasks;
+  const countToday = document.getElementById('intakeFilterCountToday');
+  if (countToday) countToday.textContent = todayItems.length;
+  const countDefer = document.getElementById('intakeFilterCountDefer');
+  if (countDefer) countDefer.textContent = deferItems.length;
+}
+
+function filterIntakeList(mode) {
+  currentIntakeFilter = mode;
+  ['All', 'Today', 'Defer'].forEach(f => {
+    const btn = document.getElementById(`filterBtn${f}`);
+    if (btn) {
+      if (f.toLowerCase() === mode) {
+        btn.className = 'intake-filter-btn px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold';
+      } else {
+        btn.className = 'intake-filter-btn px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-transparent font-semibold';
+      }
+    }
+  });
+  renderIntakeTasks(mode);
+}
+
+function renderIntakeTasks(filterMode = 'all') {
+  const container = document.getElementById('intakeTasksContainer');
+  if (!container) return;
+
+  const items = getIntakeUniverseWithRecommendations();
+  const filtered = items.filter(({ task, rec }) => {
+    if (filterMode === 'today') return !rec.isOverflow;
+    if (filterMode === 'defer') return rec.isOverflow;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center text-slate-400 border border-dashed border-slate-700 rounded-2xl">
+        <i class="fa-solid fa-check-circle text-emerald-400 text-2xl mb-2 block"></i>
+        No tasks matching this filter.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(({ task, rec }) => {
+    const isAligned = task.slot === rec.recommendedSlot;
+
+    let statusBadges = '';
+    if (task.isDueToday) {
+      statusBadges += `<span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">Due Today</span>`;
+    }
+    if (task.isPlannedToday) {
+      statusBadges += `<span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold">Planned Today</span>`;
+    }
+
+    const recBadge = rec.isOverflow
+      ? `<span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold inline-flex items-center gap-1.5"><i class="fa-solid fa-moon text-[10px]"></i> ${rec.label}</span>`
+      : `<span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold inline-flex items-center gap-1.5"><i class="fa-solid fa-bolt text-[10px]"></i> ${rec.label}</span>`;
+
+    const quickAction = !isAligned
+      ? `<button type="button" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-[11px] font-bold transition flex items-center gap-1 shadow-sm" onclick="assignTaskSlot('${task.id}', '${rec.recommendedSlot}')" title="Apply ChronoFlow recommendation"><i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Apply Rec</button>`
+      : `<span class="px-2.5 py-1 text-[11px] text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg"><i class="fa-solid fa-check"></i> Slotted</span>`;
+
+    return `
+      <div class="p-3.5 rounded-2xl bg-slate-900/80 border ${rec.isOverflow ? 'border-amber-500/30' : 'border-slate-700/70'} hover:border-slate-600 transition flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm">
+        <div class="space-y-1.5 flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 truncate max-w-[200px]">${escapeHtml(task.project || 'General')}</span>
+            ${statusBadges}
+            <span class="text-[11px] font-mono text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${task.duration || 30}m</span>
+            ${task.omniTime ? `<span class="text-[11px] font-mono text-slate-400"><i class="fa-regular fa-bell mr-1"></i>${task.omniTime}</span>` : ''}
+          </div>
+          <div class="text-xs font-semibold text-white tracking-wide leading-snug">
+            ${escapeHtml(task.title)}
+          </div>
+          <div class="flex items-start gap-2 pt-0.5 flex-wrap sm:flex-nowrap">
+            <div class="shrink-0">${recBadge}</div>
+            <p class="text-[11px] text-slate-400 leading-tight">${escapeHtml(rec.rationale)}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end md:self-center shrink-0">
+          <div class="flex flex-col items-end gap-1">
+            <div class="text-[10px] uppercase font-bold text-slate-400">Target Phase / Staging</div>
+            <div class="flex items-center gap-1.5">
+              <select class="bg-slate-950 text-xs font-semibold text-slate-200 border border-slate-700 rounded-xl px-2.5 py-1.5 focus:border-amber-400 focus:outline-none" onchange="assignTaskSlot('${task.id}', this.value)">
+                <optgroup label="Today's Ultradian Cycles">
+                  <option value="c1" ${task.slot === 'c1' ? 'selected' : ''}>Cycle 1: Golden Peak (10:45 AM)</option>
+                  <option value="c2" ${task.slot === 'c2' ? 'selected' : ''}>Cycle 2: Execution Peak (12:40 PM)</option>
+                  <option value="c3" ${task.slot === 'c3' ? 'selected' : ''}>Cycle 3: Admin Blitz (2:45 PM)</option>
+                  <option value="c4" ${task.slot === 'c4' ? 'selected' : ''}>Cycle 4: Rebound Intake (4:25 PM)</option>
+                  <option value="shutdown" ${task.slot === 'shutdown' ? 'selected' : ''}>Workday Shutdown Ritual</option>
+                  <option value="foundation" ${task.slot === 'foundation' ? 'selected' : ''}>Morning Foundation</option>
+                </optgroup>
+                <optgroup label="Defend & Defer (Staging)">
+                  <option value="day_1" ${task.slot === 'day_1' ? 'selected' : ''}>Tomorrow (Day 1 Staging)</option>
+                  <option value="day_2" ${task.slot === 'day_2' ? 'selected' : ''}>In 2 Days (Day 2 Staging)</option>
+                  <option value="day_3" ${task.slot === 'day_3' ? 'selected' : ''}>In 3 Days (Day 3 Staging)</option>
+                  <option value="unscheduled" ${task.slot === 'unscheduled' ? 'selected' : ''}>Unscheduled / Backlog</option>
+                </optgroup>
+              </select>
+              ${quickAction}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function assignTaskSlot(taskId, targetSlot) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  task.slot = targetSlot;
+  renderApp();
+  renderIntakeDiagnostic();
+  renderIntakeTasks(currentIntakeFilter);
+  showToast(`Updated "${task.title.substring(0, 24)}..." -> ${targetSlot}`);
+}
+window.assignTaskSlot = assignTaskSlot;
+
+function acceptAllRecommendations() {
+  const items = getIntakeUniverseWithRecommendations();
+  let count = 0;
+  items.forEach(({ task, rec }) => {
+    if (task.slot !== rec.recommendedSlot) {
+      task.slot = rec.recommendedSlot;
+      count++;
+    }
+  });
+  renderApp();
+  renderIntakeDiagnostic();
+  renderIntakeTasks(currentIntakeFilter);
+  showToast(`✨ Applied ChronoFlow recommendations to ${count} tasks!`);
+}
+
+function deferOverflowToTomorrow() {
+  const items = getIntakeUniverseWithRecommendations();
+  let count = 0;
+  items.forEach(({ task, rec }) => {
+    if (rec.isOverflow && task.slot !== 'day_1') {
+      task.slot = 'day_1';
+      count++;
+    }
+  });
+  renderApp();
+  renderIntakeDiagnostic();
+  renderIntakeTasks(currentIntakeFilter);
+  showToast(`🌙 Staged ${count} overflow tasks to Tomorrow (Day 1 staging) to defend cognitive recovery!`);
+}
+
